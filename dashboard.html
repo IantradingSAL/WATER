@@ -354,11 +354,12 @@ const OFFICERS=[];
 // ── ROLE DEFINITIONS ──────────────────────────────────────────────────────────
 // Roles are stored in Supabase user metadata: { role: 'mayor'|'admin'|'approver'|'officer', name: '...' }
 const ROLE_CFG={
-  mayor:   {l:'رئيس البلدية',   i:'👑', A:true,  add:true,  del:true,  edit:true,  admin:true,  export:true, print:true, settings:true, profile:true, activity:true, audit:true, wa:true},
-  admin:   {l:'المدير',         i:'⚙️', A:false, add:true,  del:true,  edit:true,  admin:true,  export:true, print:true, settings:true, profile:true, activity:true, audit:true, wa:true},
+  mayor:   {l:'رئيس البلدية',   i:'👑', A:true,  add:true,  del:true,  edit:true,  admin:true,  export:true, print:true, settings:true, profile:true, activity:true, audit:true, wa:true, f_water:true},
+  admin:   {l:'المدير',         i:'⚙️', A:false, add:true,  del:true,  edit:true,  admin:true,  export:true, print:true, settings:true, profile:true, activity:true, audit:true, wa:true, f_water:true},
   approver:{l:'مسؤول الموافقات', i:'✅', A:true,  add:false, del:false, edit:false, admin:false, export:false, print:true, settings:false, profile:true, activity:false, audit:true, wa:false},
   officer: {l:'موظف المتابعة',  i:'👤', A:false, add:true,  del:false, edit:true,  admin:false, export:false, print:true, settings:false, profile:true, activity:false, audit:false, wa:false},
   viewer:  {l:'عرض فقط',        i:'👁️', A:false, add:false, del:false, edit:false, admin:false, export:false, print:false, settings:false, profile:true, activity:false, audit:false, wa:false},
+  water_only:{l:'رئيس لجنة الري', i:'💧', A:false, add:false, del:false, edit:false, admin:false, export:false, print:false, settings:false, profile:true, activity:false, audit:false, wa:false, f_water:true},
 };
 
 // ── SUPABASE ──────────────────────────────────────────────────────────────────
@@ -2274,10 +2275,10 @@ window.BUILTIN_ROLES = {
     perms:['view_all','add_case','edit_case','change_status','assign_case','approve_case','reject_case','internal_note','public_reply','upload_docs','view_docs','type_complaint','type_welfare','type_permit','type_inquiry','f_audit','f_print'],
     notifs:['new_case','approval_needed','doc_added','approved','rejected']},
   admin:   {label:'⚙️ المدير',          color:'#1a6eb5', bg:'#daeaf8',
-    perms:['view_all','add_case','edit_case','delete_case','change_status','assign_case','approve_case','reject_case','internal_note','public_reply','upload_docs','view_docs','type_complaint','type_welfare','type_permit','type_inquiry','f_activity','f_audit','f_wa','f_export','f_print','f_settings','manage_users','manage_cats','manage_roles'],
+    perms:['view_all','add_case','edit_case','delete_case','change_status','assign_case','approve_case','reject_case','internal_note','public_reply','upload_docs','view_docs','type_complaint','type_welfare','type_permit','type_inquiry','f_activity','f_audit','f_wa','f_export','f_print','f_settings','manage_users','manage_cats','manage_roles','f_water'],
     notifs:['new_case','status_change','approval_needed']},
   mayor:   {label:'👑 رئيس البلدية',    color:'#6535a8', bg:'#ede8f8',
-    perms:[], notifs:[]},
+    perms:['f_water'], notifs:[]},
   water_only:{label:'💧 صلاحية الري فقط', color:'#0891b2', bg:'#e0f2fe',
     perms:['f_water'],
     notifs:[]},
