@@ -104,6 +104,13 @@ function getOwnerSched(owner,offset){
 // ── INIT ──────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async function(){
   sb=window.supabase.createClient(SB_URL,SB_KEY,{realtime:{enabled:false}});
+  // Safety timeout: always show UI after 4 seconds regardless of DB state
+  var safetyTimer = setTimeout(function(){
+    var lm=document.getElementById('loading-msg');
+    var lc=document.getElementById('lookup-card');
+    if(lm) lm.style.display='none';
+    if(lc) lc.style.display='block';
+  }, 4000);
 
   // Load owners: try irr_owners table → fallback to settings → fallback to localStorage
   try{
@@ -155,6 +162,7 @@ window.addEventListener('DOMContentLoaded', async function(){
     }catch(e2){}
   }
 
+  clearTimeout(safetyTimer);
   document.getElementById('loading-msg').style.display='none';
   document.getElementById('lookup-card').style.display='block';
   setTimeout(function(){var p=document.getElementById('wp-phone');if(p)p.focus();},200);
