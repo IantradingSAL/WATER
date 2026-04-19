@@ -344,7 +344,14 @@ const PL={high:'عالية',medium:'متوسطة',low:'منخفضة'};
 const STATUSES=['new','in-progress','review','pending-approval','resolved','closed'];
 const PRIOS=['high','medium','low'];
 const TYPES_DEFAULT=['complaint','welfare','permit','inquiry'];
-function getDynTypes(){try{return getCats().map(function(c){return c.id;});}catch(e){return TYPES_DEFAULT;}}
+function getDynTypes(){
+  try{
+    var cats=getCats();
+    var anyPerm=cats.some(function(c){return canDo('type_'+c.id);});
+    if(!anyPerm) return cats.map(function(c){return c.id;});
+    return cats.filter(function(c){return canDo('type_'+c.id);}).map(function(c){return c.id;});
+  }catch(e){return TYPES_DEFAULT;}
+}
 var TYPES=TYPES_DEFAULT;
 // Init TYPES from saved cats on page load
 try{var _sc=localStorage.getItem('wadi_cats');if(_sc){var _cats=JSON.parse(_sc);TYPES.length=0;_cats.forEach(function(c){TYPES.push(c.id);});}}catch(e){}
@@ -354,12 +361,12 @@ const OFFICERS=[];
 // ── ROLE DEFINITIONS ──────────────────────────────────────────────────────────
 // Roles are stored in Supabase user metadata: { role: 'mayor'|'admin'|'approver'|'officer', name: '...' }
 const ROLE_CFG={
-  mayor:   {l:'رئيس البلدية',   i:'👑', A:true,  add:true,  del:true,  edit:true,  admin:true,  export:true, print:true, settings:true, profile:true, activity:true, audit:true, wa:true, f_water:true},
-  admin:   {l:'المدير',         i:'⚙️', A:false, add:true,  del:true,  edit:true,  admin:true,  export:true, print:true, settings:true, profile:true, activity:true, audit:true, wa:true, f_water:true},
+  mayor:   {l:'رئيس البلدية',   i:'👑', A:true,  add:true,  del:true,  edit:true,  admin:true,  export:true, print:true, settings:true, profile:true, activity:true, audit:true, wa:true, f_water:true, 'type_complaint':true, 'type_welfare':true, 'type_permit':true, 'type_inquiry':true, 'type_water':true, 'type_ifada':true},
+  admin:   {l:'المدير',         i:'⚙️', A:false, add:true,  del:true,  edit:true,  admin:true,  export:true, print:true, settings:true, profile:true, activity:true, audit:true, wa:true, f_water:true, 'type_complaint':true, 'type_welfare':true, 'type_permit':true, 'type_inquiry':true, 'type_water':true, 'type_ifada':true},
   approver:{l:'مسؤول الموافقات', i:'✅', A:true,  add:false, del:false, edit:false, admin:false, export:false, print:true, settings:false, profile:true, activity:false, audit:true, wa:false},
   officer: {l:'موظف المتابعة',  i:'👤', A:false, add:true,  del:false, edit:true,  admin:false, export:false, print:true, settings:false, profile:true, activity:false, audit:false, wa:false},
   viewer:  {l:'عرض فقط',        i:'👁️', A:false, add:false, del:false, edit:false, admin:false, export:false, print:false, settings:false, profile:true, activity:false, audit:false, wa:false},
-  water_only:{l:'رئيس لجنة الري', i:'💧', A:false, add:false, del:false, edit:false, admin:false, export:false, print:false, settings:false, profile:true, activity:false, audit:false, wa:false, f_water:true},
+  water_only:{l:'رئيس لجنة الري', i:'💧', A:false, add:false, del:false, edit:false, admin:false, export:false, print:false, settings:false, profile:true, activity:false, audit:false, wa:false, f_water:true, 'type_water':true},
 };
 
 // ── SUPABASE ──────────────────────────────────────────────────────────────────
@@ -389,7 +396,21 @@ function tick(){
   }catch(e){}
 document.getElementById('LD').textContent=new Date().toLocaleString('ar-LB',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});}
 function getRoleCfg(){return ROLE_CFG[userRole]||ROLE_CFG.officer;}
-function canDo(action){return !!getRoleCfg()[action];}
+function canDo(action){
+  // Check static ROLE_CFG first
+  if(getRoleCfg()[action]) return true;
+  // Check custom role perms saved by roles editor
+  try{
+    var saved=JSON.parse(localStorage.getItem('wadi_role_'+userRole)||'{}');
+    if(saved.perms && saved.perms.indexOf(action)>=0) return true;
+  }catch(e){}
+  // Check BUILTIN_ROLES perms array
+  try{
+    var br=BUILTIN_ROLES[userRole];
+    if(br && br.perms && br.perms.indexOf(action)>=0) return true;
+  }catch(e){}
+  return false;
+}
 function guard(action,msg){
   if(canDo(action)) return true;
   toast(msg || '🚫 ليس لديك صلاحية لهذه العملية','err');
@@ -634,6 +655,10 @@ async function setupUser(user){
   document.getElementById('UE').textContent=user.email;
   document.getElementById('UR').innerHTML=R.i+' '+R.l;
   applyRoleVisibility();
+  // Sync ALL_PERMS.types from current cats
+  ALL_PERMS.types = getCats().map(function(cat){
+    return {id:'type_'+cat.id, icon:cat.icon, label:'إدارة '+cat.label};
+  });
   renderCatsNav();
   // Add self to officers immediately as fallback
   if(!OFFICERS.includes(userName)) OFFICERS.push(userName);
@@ -791,8 +816,22 @@ function navType(el,t){
 function sf(f,btn){stF=f;document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');page=1;go();}
 function go(){qF=document.getElementById('QQ').value.trim();tyF=document.getElementById('TS').value;sortM=document.getElementById('SS').value;saveViewPrefs();render();}
 
+function getVisibleTypes(){
+  // Returns array of type IDs user is allowed to see based on role perms
+  var cats=getCats();
+  var allowed=cats.filter(function(c){
+    return canDo('type_'+c.id);
+  });
+  // If no type perms defined (old roles), show all
+  if(!allowed.length) return null;
+  return allowed.map(function(c){return c.id;});
+}
+
 function filtered(){
   let d=[...cases];
+  // Filter by type permissions
+  var visibleTypes=getVisibleTypes();
+  if(visibleTypes) d=d.filter(c=>visibleTypes.includes(c.type));
   if(srcF!=='all')d=d.filter(c=>c.source===srcF);
   if(stF!=='all')d=d.filter(c=>c.status===stF);
   if(tyF!=='all')d=d.filter(c=>c.type===tyF);
@@ -2083,6 +2122,7 @@ const WADI_CATS_DEFAULT = [
   {id:'permit',    icon:'🏗️', label:'ترخيص'},
   {id:'inquiry',   icon:'❓', label:'استفسار'},
   {id:'ifada',     icon:'📜', label:'إفادة عقارية'},
+  {id:'water',     icon:'💧', label:'شكوى ري'},
 ];
 function getCats() {
   // Return cached value (loaded from Supabase on login)
@@ -2095,6 +2135,10 @@ function getCats() {
 async function saveCats(c) {
   // Save to localStorage immediately (for fast UI)
   localStorage.setItem('wadi_cats', JSON.stringify(c));
+  // Auto-sync ALL_PERMS.types with new categories
+  ALL_PERMS.types = c.map(function(cat){
+    return {id:'type_'+cat.id, icon:cat.icon, label:'إدارة '+cat.label};
+  });
   renderCatsNav();
   // Update type selects
   var sel = document.getElementById('at');
@@ -2149,7 +2193,13 @@ function renderCatsNav() {
     el.id = 'cats-nav-list';
     found.parentNode.insertBefore(el, found.nextSibling);
   }
-  var cats = getCats();
+  var cats = getCats().filter(function(c){
+    // Show category only if user has type permission (or no perms defined = show all)
+    var hasPerm = canDo('type_'+c.id);
+    var allCats = getCats();
+    var anyPerm = allCats.some(function(x){ return canDo('type_'+x.id); });
+    return !anyPerm || hasPerm;
+  });
   el.innerHTML = cats.map(function(c) {
     return '<div class="ni" id="nav-' + c.id + '" data-type="' + c.id + '" onclick="navTypeById(this)">' +
       '<span class="nii">' + c.icon + '</span> ' + c.label +
@@ -2230,6 +2280,7 @@ window.ALL_PERMS = {
     {id:'type_welfare',  icon:'🤝', label:'إدارة الرعاية'},
     {id:'type_permit',   icon:'🏗️',label:'إدارة التراخيص'},
     {id:'type_inquiry',  icon:'❓', label:'إدارة الاستفسارات'},
+    {id:'type_water',    icon:'💧', label:'شكاوى الري'},
   ],
   features: [
     {id:'f_activity',   icon:'📊', label:'نشاط الموظفين'},
@@ -2275,12 +2326,12 @@ window.BUILTIN_ROLES = {
     perms:['view_all','add_case','edit_case','change_status','assign_case','approve_case','reject_case','internal_note','public_reply','upload_docs','view_docs','type_complaint','type_welfare','type_permit','type_inquiry','f_audit','f_print'],
     notifs:['new_case','approval_needed','doc_added','approved','rejected']},
   admin:   {label:'⚙️ المدير',          color:'#1a6eb5', bg:'#daeaf8',
-    perms:['view_all','add_case','edit_case','delete_case','change_status','assign_case','approve_case','reject_case','internal_note','public_reply','upload_docs','view_docs','type_complaint','type_welfare','type_permit','type_inquiry','f_activity','f_audit','f_wa','f_export','f_print','f_settings','manage_users','manage_cats','manage_roles','f_water'],
+    perms:['view_all','add_case','edit_case','delete_case','change_status','assign_case','approve_case','reject_case','internal_note','public_reply','upload_docs','view_docs','type_complaint','type_welfare','type_permit','type_inquiry','f_activity','f_audit','f_wa','f_export','f_print','f_settings','manage_users','manage_cats','manage_roles'],
     notifs:['new_case','status_change','approval_needed']},
   mayor:   {label:'👑 رئيس البلدية',    color:'#6535a8', bg:'#ede8f8',
-    perms:['f_water'], notifs:[]},
+    perms:['type_complaint','type_welfare','type_permit','type_inquiry','type_water','f_water'], notifs:[]},
   water_only:{label:'💧 صلاحية الري فقط', color:'#0891b2', bg:'#e0f2fe',
-    perms:['f_water'],
+    perms:['f_water','type_water'],
     notifs:[]},
 };
 // Mayor gets all lazily
@@ -4403,18 +4454,18 @@ function renderWaterModal(){
     // Add panel
     '<div id="ir-add" style="display:none">',
     '<div class="admin-section"><div class="admin-header">➕ إضافة صاحب حق ري</div>',
-    '<div class="fg"><div class="fl">الاسم *</div><input type="text" class="fi" id="ir-name" ></div>',
-    '<div class="fg"><div class="fl">الهاتف *</div><input type="tel" class="fi" id="ir-phone" placeholder="03 123456" style="direction:ltr"></div>',
+    '<div class="fg"><div class="fl">الاسم *</div><input type="text" class="fi" id="ir-name"></div>',
+    '<div class="fg"><div class="fl">الهاتف *</div><input type="tel" class="fi" id="ir-phone" style="direction:ltr"></div>',
     '<div class="fg"><div class="fl">البريد</div><input type="email" class="fi" id="ir-email" style="direction:ltr"></div>',
-    '<div class="fg"><div class="fl">المنطقة</div><input type="text" class="fi" id="ir-area" value="وادي الست"></div>',
-    '<div class="fg"><div class="fl">القطعة</div><input type="text" class="fi" id="ir-land" ></div>',
-    '<div class="fg"><div class="fl">المحصول</div><input type="text" class="fi" id="ir-crop" placeholder="زيتون / تفاح / خضار"></div>',
+    '<div class="fg"><div class="fl">المنطقة</div><input type="text" class="fi" id="ir-area"></div>',
+    '<div class="fg"><div class="fl">القطعة</div><input type="text" class="fi" id="ir-land"></div>',
+    '<div class="fg"><div class="fl">المحصول</div><input type="text" class="fi" id="ir-crop"></div>',
     '<div class="fg"><div class="fl">الساعات *</div>',
     '<div style="display:flex;gap:8px;align-items:center">',
-    '<input type="number" class="fi" id="ir-hours" step="0.5" min="0.5" max="48"  style="flex:1" data-irr="hours">',
+    '<input type="number" class="fi" id="ir-hours" step="0.5" min="0.5" max="48" style="flex:1" data-irr="hours">',
     '<span id="ir-rem-badge" style="font-size:12px;padding:3px 10px;border-radius:8px;background:var(--bg2);border:1px solid var(--border)">متبقي: '+rem.toFixed(1)+'س</span>',
     '</div></div>',
-    '<div class="fg"><div class="fl">الترتيب *</div><input type="number" class="fi" id="ir-order"  value="'+(owners.length+1)+'" min="1" data-irr="order"></div>',
+    '<div class="fg"><div class="fl">الترتيب *</div><input type="number" class="fi" id="ir-order" value="'+(owners.length+1)+'" min="1" data-irr="order"></div>',
     '<div style="background:#f0fdf4;border:1.5px solid #a8d9b4;border-radius:10px;padding:10px;margin:8px 0;font-size:13px">',
     '<div style="font-size:11px;font-weight:700;color:#1e5429;margin-bottom:4px">📅 معاينة الدور</div>',
     '<div id="ir-prev-day">☀️ —</div><div id="ir-prev-night">🌙 —</div></div>',
