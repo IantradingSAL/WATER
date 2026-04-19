@@ -40,7 +40,7 @@ body{font-family:var(--font);direction:rtl;background:var(--bg);min-height:100vh
   <div id="lookup-card" class="card" style="display:none">
     <div style="font-size:16px;font-weight:800;color:#1e5429;margin-bottom:6px;text-align:center">🔍 استعلام عن دورة الري</div>
     <div style="font-size:13px;color:var(--text3);margin-bottom:16px;text-align:center">أدخل رقم هاتفك المسجّل لدى البلدية</div>
-    <input type="tel" class="fi" id="wp-phone" placeholder="03xxxxxx" onkeydown="if(event.key==='Enter')lookupWaterOwner()">
+    <input type="tel" class="fi" id="wp-phone" placeholder="03 123456" onkeydown="if(event.key==='Enter')lookupWaterOwner()">
     <div id="wp-err" style="color:#e74c3c;font-size:13px;margin-top:8px;min-height:18px;text-align:center"></div>
     <button class="btn btn-green" onclick="lookupWaterOwner()" style="margin-top:10px">🔍 بحث عن دوري</button>
   </div>
@@ -49,8 +49,8 @@ body{font-family:var(--font);direction:rtl;background:var(--bg);min-height:100vh
 </div>
 
 <script>
-const SB_URL='__SUPABASE_URL__';
-const SB_KEY='__SUPABASE_ANON_KEY__';
+const SB_URL='https://onjbwhkmmtqnymhjnplw.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9uamJ3aGttbXRxbnltaGpucGx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDY4MjUsImV4cCI6MjA5MDM4MjgyNX0.lhlsRdOqVHZuOXCJa0lCNuZkYJHhf1AZ_zOwqHHAeG4';
 const MUN_ID='00000000-0000-0000-0000-000000000001';
 let sb=null, _owners=[], _config={};
 
