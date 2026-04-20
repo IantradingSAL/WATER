@@ -786,7 +786,7 @@ function exportActivityJSON(){const blob=new Blob([JSON.stringify(readLS(APP_ACT
 function exportAuditJSON(){const blob=new Blob([JSON.stringify(readLS(APP_AUDIT_KEY,[]),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='audit_log.json';a.click();URL.revokeObjectURL(a.href);}
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
-async function doLogin(){
+async async function doLogin(){
   const email=document.getElementById('EM').value.trim();
   const pw=document.getElementById('PW').value;
   const errEl=document.getElementById('LERR');
@@ -2042,29 +2042,31 @@ async function citLogout(){
 
 // Override window load to show landing
 window.addEventListener('load',async()=>{
-  // Clear any old setup screen data from previous versions
   localStorage.removeItem('sb_url');
   localStorage.removeItem('sb_key');
   document.getElementById('APP').style.display='none';
   document.getElementById('LS').style.display='none';
-  if(typeof document.getElementById('CP')!=='undefined' && document.getElementById('CP'))
-    document.getElementById('CP').style.display='none';
+  if(document.getElementById('CP')) document.getElementById('CP').style.display='none';
   if(!dbR){
-    document.getElementById('LANDING').style.display='flex';
+    // DB not connected - show login with error
+    document.getElementById('LS').style.display='flex';
+    var errEl=document.getElementById('LERR');
+    if(errEl) errEl.textContent='⚠️ تعذّر الاتصال بالخادم';
     return;
   }
   try{
     const{data:{session}}=await sb.auth.getSession();
     if(session&&session.user){
       const role=session.user?.user_metadata?.role||'';
-      if(['mayor','admin','approver','officer','viewer'].includes(role)){
-        document.getElementById('LANDING').style.display='none';
+      const allRoles=['mayor','admin','approver','officer','viewer','water_only','water_admin'];
+      if(allRoles.includes(role)){
         await setupUser(session.user);
         return;
       }
     }
-  }catch(e){console.error('Session check error:',e);}
-  document.getElementById('LANDING').style.display='flex';
+  }catch(e){console.error('Session check:',e);}
+  // No session — show login screen
+  document.getElementById('LS').style.display='flex';
 });
 
 
@@ -4007,6 +4009,16 @@ function wnDelNew(btn){var p=btn.parentElement;if(p&&p.parentElement)p.parentEle
 
 // ── WHAT'S NEW MODAL (Welcome Page) ──────────────────────────────────────────
 const WN_VERSIONS = [
+  {
+    version: '3.0', date: 'أبريل 2026', color: '#f0fdf4', badgeColor: '#22c55e',
+    features: [
+      {icon:'💧', title:'نظام دورة مياه الري', desc:'إدارة كاملة لأصحاب حقوق الري — جدول + إشعارات بريدية تلقائية'},
+      {icon:'🌊', title:'شكوى ري', desc:'نوع طلب جديد في بوابة المواطن — يظهر في لوحة التحكم حسب الصلاحيات'},
+      {icon:'🎭', title:'أدوار مرتبطة بالتصنيفات', desc:'منح كل موظف صلاحية رؤية تصنيفات محددة فقط من مركز الأدوار'},
+      {icon:'🏗️', title:'3 بوابات منفصلة', desc:'الرئيسية / الموظفون / الري — بنية واضحة واحترافية'},
+      {icon:'❓', title:'دليل المستخدم', desc:'زر ? في كل صفحة يشرح البروتوكول والوظائف'},
+    ]
+  },
   {
     version: '2.5', date: 'أبريل 2026', color: '#eef5ff', badgeColor: '#3b82f6',
     features: [
