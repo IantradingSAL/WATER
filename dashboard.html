@@ -462,7 +462,8 @@ select.fi{cursor:pointer;appearance:none;-webkit-appearance:none;}
 <div style="position:fixed;bottom:0;left:0;right:0;background:rgba(15,77,130,0.95);color:rgba(255,255,255,0.6);text-align:center;padding:8px;font-size:12px;z-index:9999;pointer-events:none;direction:ltr">Powered by <strong style="color:#fff">IanTrading SAL</strong> &nbsp;·&nbsp; All rights reserved © 2026</div>
 <button class="help-btn" onclick="openHelp('d')" title="مساعدة">?</button>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
+<script>const MUN_ID='00000000-0000-0000-0000-000000000001';
+
 
 const SUPABASE_URL="https://onjbwhkmmtqnymhjnplw.supabase.co";
 const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9uamJ3aGttbXRxbnltaGpucGx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDY4MjUsImV4cCI6MjA5MDM4MjgyNX0.lhlsRdOqVHZuOXCJa0lCNuZkYJHhf1AZ_zOwqHHAeG4";
@@ -4208,14 +4209,24 @@ function irrCfg(){
 }
 function saveIrrOwners(arr){
   _irrOwners=arr;
-  localStorage.setItem('wadi_irr_owners',JSON.stringify(arr));
+  try{ localStorage.setItem('wadi_irr_owners',JSON.stringify(arr)); }catch(e){}
   if(dbR&&sb){
-    sb.from('irr_owners').upsert(arr.map(function(o){
-      return {id:o.id,municipality_id:'00000000-0000-0000-0000-000000000001',
-        name:o.name,phone:o.phone,email:o.email||null,area:o.area||null,
-        land_name:o.landName||null,crop:o.crop||null,
-        hours:o.hours,sort_order:o.order||1,notes:o.notes||null};
-    }),{onConflict:'id'}).catch(function(){});
+    try{
+      var payload=arr.map(function(o){
+        return {id:o.id,
+          municipality_id:'00000000-0000-0000-0000-000000000001',
+          name:o.name, phone:o.phone,
+          email:o.email||null, area:o.area||null,
+          land_name:o.landName||o.land_name||null,
+          crop:o.crop||null,
+          hours:parseFloat(o.hours)||0,
+          sort_order:parseInt(o.order||o.sort_order)||1,
+          notes:o.notes||null};
+      });
+      sb.from('irr_owners').upsert(payload,{onConflict:'id'})
+        .then(function(res){if(res.error)console.log('irr upsert:',res.error.message);})
+        .catch(function(e){console.log('irr upsert catch:',e);});
+    }catch(e){console.log('saveIrrOwners build err:',e);}
   }
 }
 function saveIrrCfg(c){
@@ -4316,7 +4327,7 @@ async function openWaterSchedule(){
     try{var ls=localStorage.getItem('wadi_irr_owners');if(ls)lsOwners=JSON.parse(ls);}catch(e){}
     if(lsOwners.length>0){
       sb.from('irr_owners').upsert(lsOwners.map(function(o){
-        return {id:o.id,municipality_id:MUN_ID,name:o.name,phone:o.phone,
+        return {id:o.id,municipality_id:'00000000-0000-0000-0000-000000000001',name:o.name,phone:o.phone,
           email:o.email||null,area:o.area||null,land_name:o.landName||null,
           crop:o.crop||null,hours:o.hours||0,sort_order:o.order||o.sort_order||1,notes:o.notes||null};
       }),{onConflict:'id'}).then(function(){
