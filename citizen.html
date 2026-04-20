@@ -448,10 +448,12 @@ const REQUIRED_DOCS = {
 
 function toast(m,t='ok'){const el=document.getElementById('toast');el.textContent=m;el.className='toast show '+t;setTimeout(()=>el.className='toast',3000);}
 function getCats() {
-  // Return cached value (loaded from Supabase on login)
   try {
     const stored = localStorage.getItem('wadi_cats');
-    if (stored) return JSON.parse(stored);
+    if (stored) {
+      var parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
   } catch(e) {}
   return WADI_CATS_DEFAULT;
 }
@@ -485,7 +487,6 @@ async function loadCatsFromSupabase() {
     if (!error && data && data.value) {
       const cats = JSON.parse(data.value);
       localStorage.setItem('wadi_cats', JSON.stringify(cats));
-      renderCatsNav();
       updateCitizenTypeSelect();
       console.log('✅ Cats loaded from Supabase:', cats.length);
     }
@@ -514,11 +515,15 @@ function updateCitizenTypeSelect() {
   }).join('');
 }
 function showCitizenHero(){
-  document.getElementById('cit-hero').style.display='block';
-  document.getElementById('cit-login-form').style.display='none';
-  document.getElementById('cit-reg-form').style.display='none';
-  document.getElementById('cit-dashboard').style.display='none';
-  document.getElementById('cit-add-form').style.display='none';
+  // Show main citizen portal (track + submit form always visible)
+  var sf=document.getElementById('submit-form-wrap');
+  if(sf) sf.style.display='block';
+  var ss=document.getElementById('c-success');
+  if(ss) ss.style.display='none';
+  // Hide sections that don't exist in standalone citizen.html (safe no-ops)
+  ['cit-login-form','cit-reg-form','cit-dashboard','cit-add-form'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.style.display='none';
+  });
 }
 function showCitizenLogin(){
   document.getElementById('cit-hero').style.display='none';
@@ -1003,6 +1008,7 @@ document.addEventListener('DOMContentLoaded', async function(){
   }catch(e){console.error('SB:',e);}
   showCitizenHero();
   await loadCats();
+  updateCitizenTypeSelect();
   try{
     var gs=await sb.auth.getSession();
     if(gs.data&&gs.data.session&&gs.data.session.user){citUser=gs.data.session.user;setupCitDashboard();}

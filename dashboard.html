@@ -488,11 +488,12 @@ const OFFICERS=[];
 // ── ROLE DEFINITIONS ──────────────────────────────────────────────────────────
 // Roles are stored in Supabase user metadata: { role: 'mayor'|'admin'|'approver'|'officer', name: '...' }
 const ROLE_CFG={
-  mayor:   {l:'رئيس البلدية',   i:'👑', A:true,  add:true,  del:true,  edit:true,  admin:true,  export:true, print:true, settings:true, profile:true, activity:true, audit:true, wa:true},
-  admin:   {l:'المدير',         i:'⚙️', A:false, add:true,  del:true,  edit:true,  admin:true,  export:true, print:true, settings:true, profile:true, activity:true, audit:true, wa:true},
-  approver:{l:'مسؤول الموافقات', i:'✅', A:true,  add:false, del:false, edit:false, admin:false, export:false, print:true, settings:false, profile:true, activity:false, audit:true, wa:false},
-  officer: {l:'موظف المتابعة',  i:'👤', A:false, add:true,  del:false, edit:true,  admin:false, export:false, print:true, settings:false, profile:true, activity:false, audit:false, wa:false},
-  viewer:  {l:'عرض فقط',        i:'👁️', A:false, add:false, del:false, edit:false, admin:false, export:false, print:false, settings:false, profile:true, activity:false, audit:false, wa:false},
+  mayor:   {l:'رئيس البلدية',   i:'👑', A:true,  add:true,  del:true,  edit:true,  admin:true,  export:true, print:true, settings:true, profile:true, activity:true, audit:true, wa:true, f_water:true, type_complaint:true, type_welfare:true, type_permit:true, type_inquiry:true, type_ifada:true, type_water:true},
+  admin:   {l:'المدير',         i:'⚙️', A:false, add:true,  del:true,  edit:true,  admin:true,  export:true, print:true, settings:true, profile:true, activity:true, audit:true, wa:true, f_water:true, type_complaint:true, type_welfare:true, type_permit:true, type_inquiry:true, type_ifada:true, type_water:true},
+  approver:{l:'مسؤول الموافقات', i:'✅', A:true,  add:false, del:false, edit:false, admin:false, export:false, print:true, settings:false, profile:true, activity:false, audit:true, wa:false, f_water:false, type_complaint:true, type_welfare:true, type_permit:true, type_inquiry:true, type_ifada:true, type_water:false},
+  officer: {l:'موظف المتابعة',  i:'👤', A:false, add:true,  del:false, edit:true,  admin:false, export:false, print:true, settings:false, profile:true, activity:false, audit:false, wa:false, f_water:false, type_complaint:true, type_welfare:true, type_permit:true, type_inquiry:true, type_ifada:true, type_water:false},
+  water_only:{l:'صلاحية الري فقط', i:'💧', A:false, add:false, del:false, edit:false, admin:false, export:false, print:false, settings:false, profile:false, activity:false, audit:false, wa:false, f_water:true, type_water:true, type_complaint:false, type_welfare:false, type_permit:false, type_inquiry:false, type_ifada:false},
+  viewer:  {l:'عرض فقط',        i:'👁️', A:false, add:false, del:false, edit:false, admin:false, export:false, print:false, settings:false, profile:true, activity:false, audit:false, wa:false, f_water:false, type_complaint:true, type_welfare:true, type_permit:true, type_inquiry:true, type_ifada:true, type_water:false},
 };
 
 // ── SUPABASE ──────────────────────────────────────────────────────────────────
@@ -886,7 +887,7 @@ function rStats(){
   document.getElementById('SP').textContent=cases.filter(c=>c.status==='in-progress').length;
   document.getElementById('SH').textContent=cases.filter(c=>c.priority==='high'&&!['resolved','closed'].includes(c.status)).length;
   document.getElementById('SR').textContent=cases.filter(c=>['resolved','closed'].includes(c.status)).length;
-  document.getElementById('nb-all').textContent=cases.length;
+  (function(){var _Rnb=getRoleCfg();var _vis=cases.filter(function(c){return _Rnb['type_'+(c.type||'complaint')]!==false;});document.getElementById('nb-all').textContent=_vis.length;})();
   document.getElementById('nb-web').textContent=cases.filter(c=>c.source==='website').length;
   document.getElementById('nb-pend').textContent=cases.filter(c=>c.approval_state==='pending').length;
   TYPES.forEach(t=>{const el=document.getElementById('nb-'+t);if(el)el.textContent=cases.filter(c=>c.type===t).length;});
@@ -926,6 +927,13 @@ function go(){qF=document.getElementById('QQ').value.trim();tyF=document.getElem
 
 function filtered(){
   let d=[...cases];
+  // ── Role-based type filtering ──────────────────────────────────────────────
+  var _R=getRoleCfg();
+  d=d.filter(function(c){
+    var pk='type_'+(c.type||'complaint');
+    return _R[pk]!==false;
+  });
+  // ── Standard filters ───────────────────────────────────────────────────────
   if(srcF!=='all')d=d.filter(c=>c.source===srcF);
   if(stF!=='all')d=d.filter(c=>c.status===stF);
   if(tyF!=='all')d=d.filter(c=>c.type===tyF);
@@ -2097,7 +2105,10 @@ function renderCatsNav() {
     found.parentNode.insertBefore(el, found.nextSibling);
   }
   var cats = getCats();
-  el.innerHTML = cats.map(function(c) {
+  var _Rcats = getRoleCfg();
+  el.innerHTML = cats.filter(function(c){
+    return _Rcats['type_'+c.id]!==false;
+  }).map(function(c) {
     return '<div class="ni" id="nav-' + c.id + '" data-type="' + c.id + '" onclick="navTypeById(this)">' +
       '<span class="nii">' + c.icon + '</span> ' + c.label +
       ' <span class="nb" id="nb-' + c.id + '">—</span></div>';
