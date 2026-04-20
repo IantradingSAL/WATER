@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>بلدية وادي الست — نظام المتابعة</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --blue:#1a6eb5;--blue2:#0f4d82;--blue3:#daeaf8;
@@ -265,7 +264,6 @@ select.fi{cursor:pointer;appearance:none;-webkit-appearance:none;}
       <div class="ni" id="nav-cit-msgs" onclick="openCitMessages()" style="display:none"><span class="nii">💬</span> رسائل المواطنين <span id="cit-msg-badge" style="background:#e74c3c;color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;margin-right:4px;display:none">0</span></div>
       <div class="ni" id="nav-wa" onclick="openWhatsAppRoles()" style="display:none"><span class="nii">📱</span> إشعارات واتساب</div>
       <div class="ni" id="nav-water" onclick="openWaterSchedule()" style="display:none"><span class="nii">💧</span> دورة المياه <span id="water-badge" style="background:#0891b2;color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;display:none"></span></div>
-      <div class="ni" id="nav-water" onclick="openWaterSchedule()" style="display:none"><span class="nii">💧</span> دورة المياه <span id="water-badge" style="background:#0891b2;color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;display:none"></span></div>
       <div class="ni" onclick="openProfile()"><span class="nii">🪪</span> ملفي الوظيفي</div>
       <div class="ni" id="nav-whatsnew" onclick="openManageNews()" style="display:none"><span class="nii">🚀</span> ما الجديد</div>
       <div class="ni feature-export" onclick="exportCSV()"><span class="nii">⬇️</span> تصدير CSV</div>
@@ -458,10 +456,12 @@ select.fi{cursor:pointer;appearance:none;-webkit-appearance:none;}
 </div>
 </div>
 
+<!-- LANDING PAGE — shown first -->
 
 
 <div style="position:fixed;bottom:0;left:0;right:0;background:rgba(15,77,130,0.95);color:rgba(255,255,255,0.6);text-align:center;padding:8px;font-size:12px;z-index:9999;pointer-events:none;direction:ltr">Powered by <strong style="color:#fff">IanTrading SAL</strong> &nbsp;·&nbsp; All rights reserved © 2026</div>
-<button class="help-btn" onclick="openHelp('dashboard')" title="مساعدة">?</button>
+<button class="help-btn" onclick="openHelp('d')" title="مساعدة">?</button>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 
 const SUPABASE_URL="https://onjbwhkmmtqnymhjnplw.supabase.co";
@@ -488,12 +488,11 @@ const OFFICERS=[];
 // ── ROLE DEFINITIONS ──────────────────────────────────────────────────────────
 // Roles are stored in Supabase user metadata: { role: 'mayor'|'admin'|'approver'|'officer', name: '...' }
 const ROLE_CFG={
-  mayor:   {l:'رئيس البلدية',   i:'👑', A:true,  add:true,  del:true,  edit:true,  admin:true,  export:true, print:true, settings:true, profile:true, activity:true, audit:true, wa:true, f_water:true, type_complaint:true, type_welfare:true, type_permit:true, type_inquiry:true, type_ifada:true, type_water:true},
-  admin:   {l:'المدير',         i:'⚙️', A:false, add:true,  del:true,  edit:true,  admin:true,  export:true, print:true, settings:true, profile:true, activity:true, audit:true, wa:true, f_water:true, type_complaint:true, type_welfare:true, type_permit:true, type_inquiry:true, type_ifada:true, type_water:true},
-  approver:{l:'مسؤول الموافقات', i:'✅', A:true,  add:false, del:false, edit:false, admin:false, export:false, print:true, settings:false, profile:true, activity:false, audit:true, wa:false, type_complaint:true, type_welfare:true, type_permit:true, type_inquiry:true, type_ifada:true, type_water:false},
-  officer: {l:'موظف المتابعة',  i:'👤', A:false, add:true,  del:false, edit:true,  admin:false, export:false, print:true, settings:false, profile:true, activity:false, audit:false, wa:false, type_complaint:true, type_welfare:true, type_permit:true, type_inquiry:true, type_ifada:true, type_water:false},
-  water_only:{l:'صلاحية الري فقط', i:'💧', A:false, add:false, del:false, edit:false, admin:false, export:false, print:false, settings:false, profile:true, activity:false, audit:false, wa:false, f_water:true, type_water:true, type_complaint:false, type_welfare:false, type_permit:false, type_inquiry:false, type_ifada:false},
-  viewer:  {l:'عرض فقط',        i:'👁️', A:false, add:false, del:false, edit:false, admin:false, export:false, print:false, settings:false, profile:true, activity:false, audit:false, wa:false, type_complaint:true, type_welfare:true, type_permit:true, type_inquiry:true, type_ifada:true, type_water:false},
+  mayor:   {l:'رئيس البلدية',   i:'👑', A:true,  add:true,  del:true,  edit:true,  admin:true,  export:true, print:true, settings:true, profile:true, activity:true, audit:true, wa:true},
+  admin:   {l:'المدير',         i:'⚙️', A:false, add:true,  del:true,  edit:true,  admin:true,  export:true, print:true, settings:true, profile:true, activity:true, audit:true, wa:true},
+  approver:{l:'مسؤول الموافقات', i:'✅', A:true,  add:false, del:false, edit:false, admin:false, export:false, print:true, settings:false, profile:true, activity:false, audit:true, wa:false},
+  officer: {l:'موظف المتابعة',  i:'👤', A:false, add:true,  del:false, edit:true,  admin:false, export:false, print:true, settings:false, profile:true, activity:false, audit:false, wa:false},
+  viewer:  {l:'عرض فقط',        i:'👁️', A:false, add:false, del:false, edit:false, admin:false, export:false, print:false, settings:false, profile:true, activity:false, audit:false, wa:false},
 };
 
 // ── SUPABASE ──────────────────────────────────────────────────────────────────
@@ -542,8 +541,6 @@ function applyRoleVisibility(){
   show('#nav-audit',R.audit,'flex');
   show('#nav-wa',R.wa,'flex');
   show('#nav-cit-msgs',R.admin||R.activity,'flex');
-  show('#nav-water', !!(R.f_water||canDo('f_water')), 'flex');
-  if(userRole==='water_only'){['#nav-pend','#nav-add','#BADD','#nav-users','#nav-cit-updates','#nav-activity','#nav-audit','#nav-wa','#nav-cit-msgs','#nav-whatsnew'].forEach(function(sel){document.querySelectorAll(sel).forEach(function(e){e.style.display='none';});});var mn=document.getElementById('MAIN');if(mn)mn.style.display='none';var fl=document.getElementById('filters');if(fl)fl.style.display='none';setTimeout(function(){openWaterSchedule();},300);}
   show('#nav-water', canDo('f_water'), 'flex');
   show('.feature-export',R.export,'inline-flex');
   document.querySelectorAll('[onclick="printFiltered()"]').forEach(el=>el.style.display=R.print?'inline-flex':'none');
@@ -889,7 +886,7 @@ function rStats(){
   document.getElementById('SP').textContent=cases.filter(c=>c.status==='in-progress').length;
   document.getElementById('SH').textContent=cases.filter(c=>c.priority==='high'&&!['resolved','closed'].includes(c.status)).length;
   document.getElementById('SR').textContent=cases.filter(c=>['resolved','closed'].includes(c.status)).length;
-  (function(){var R=getRoleCfg();var v=cases.filter(function(c){return R['type_'+(c.type||'complaint')]!==false;});document.getElementById('nb-all').textContent=v.length;})();
+  document.getElementById('nb-all').textContent=cases.length;
   document.getElementById('nb-web').textContent=cases.filter(c=>c.source==='website').length;
   document.getElementById('nb-pend').textContent=cases.filter(c=>c.approval_state==='pending').length;
   TYPES.forEach(t=>{const el=document.getElementById('nb-'+t);if(el)el.textContent=cases.filter(c=>c.type===t).length;});
@@ -929,8 +926,6 @@ function go(){qF=document.getElementById('QQ').value.trim();tyF=document.getElem
 
 function filtered(){
   let d=[...cases];
-  const R=getRoleCfg();
-  d=d.filter(c=>{var pk='type_'+(c.type||'complaint');return R[pk]!==false;});
   if(srcF!=='all')d=d.filter(c=>c.source===srcF);
   if(stF!=='all')d=d.filter(c=>c.status===stF);
   if(tyF!=='all')d=d.filter(c=>c.type===tyF);
@@ -1504,21 +1499,14 @@ document.addEventListener('DOMContentLoaded', function(){
 // ── CITIZEN PORTAL ────────────────────────────────────────────────────────────
 let citUser = null;
 
-function showLanding(){
-  document.getElementById('LANDING').style.display='flex';
-  document.getElementById('LS').style.display='none';
-  document.getElementById('CP').style.display='none';
-  document.getElementById('APP').style.display='none';
-}
+function showLanding(){ window.location='index.html'; }
 function showCitizenPortal(){
   updateCitizenTypeSelect();
-  document.getElementById('LANDING').style.display='none';
   document.getElementById('CP').style.display='block';
   document.getElementById('LS').style.display='none';
   showCitizenHero();
 }
 function showStaffLogin(){
-  document.getElementById('LANDING').style.display='none';
   document.getElementById('CP').style.display='none';
   document.getElementById('LS').style.display='flex';
 }
@@ -1994,7 +1982,7 @@ window.addEventListener('load',async()=>{
   if(typeof document.getElementById('CP')!=='undefined' && document.getElementById('CP'))
     document.getElementById('CP').style.display='none';
   if(!dbR){
-    document.getElementById('LANDING').style.display='flex';
+    document.getElementById('LS').style.display='flex';
     return;
   }
   try{
@@ -2002,13 +1990,12 @@ window.addEventListener('load',async()=>{
     if(session&&session.user){
       const role=session.user?.user_metadata?.role||'';
       if(['mayor','admin','approver','officer','viewer'].includes(role)){
-        document.getElementById('LANDING').style.display='none';
         await setupUser(session.user);
         return;
       }
     }
   }catch(e){console.error('Session check error:',e);}
-  document.getElementById('LANDING').style.display='flex';
+  document.getElementById('LS').style.display='flex';
 });
 
 
@@ -2110,9 +2097,7 @@ function renderCatsNav() {
     found.parentNode.insertBefore(el, found.nextSibling);
   }
   var cats = getCats();
-  var R2=getRoleCfg();
   el.innerHTML = cats.map(function(c) {
-    if(R2['type_'+c.id]===false) return '';
     return '<div class="ni" id="nav-' + c.id + '" data-type="' + c.id + '" onclick="navTypeById(this)">' +
       '<span class="nii">' + c.icon + '</span> ' + c.label +
       ' <span class="nb" id="nb-' + c.id + '">—</span></div>';
@@ -2164,10 +2149,9 @@ function saveCatsForm() {
     var lbl = document.getElementById('cat-lbl-' + i) ? document.getElementById('cat-lbl-' + i).value.trim() : '';
     var ico = document.getElementById('cat-ico-' + i) ? (document.getElementById('cat-ico-' + i).value.trim() || '📌') : '📌';
     if (!lbl) continue;
-    var ec=getCats().find(function(c){return c.label===lbl;});newCats.push({id:ec?ec.id:('cat_'+Date.now().toString(36).slice(-5)+i),icon:ico,label:lbl});
+    newCats.push({id: 'cat_' + Date.now().toString(36).slice(-6) + i, icon: ico, label: lbl});
   }
   if (!newCats.length) { toast('أضف تصنيفاً واحداً', 'err'); return; }
-  if(window.ALL_PERMS&&ALL_PERMS.types){var eIds=ALL_PERMS.types.map(function(t){return t.id;});newCats.forEach(function(c){var pid='type_'+c.id;if(eIds.indexOf(pid)<0)ALL_PERMS.types.push({id:pid,icon:c.icon,label:'إدارة: '+c.label});});}
   saveCats(newCats); toast('✅ تم حفظ التصنيفات'); closeM();
 }
 
@@ -2193,7 +2177,6 @@ window.ALL_PERMS = {
     {id:'type_welfare',  icon:'🤝', label:'إدارة الرعاية'},
     {id:'type_permit',   icon:'🏗️',label:'إدارة التراخيص'},
     {id:'type_inquiry',  icon:'❓', label:'إدارة الاستفسارات'},
-    {id:'type_ifada',    icon:'📜', label:'إدارة الإفادات العقارية'},
     {id:'type_water',    icon:'💧', label:'إدارة شكاوى الري'},
   ],
   features: [
@@ -3952,16 +3935,6 @@ function wnDelNew(btn){var p=btn.parentElement;if(p&&p.parentElement)p.parentEle
 // ── WHAT'S NEW MODAL (Welcome Page) ──────────────────────────────────────────
 const WN_VERSIONS = [
   {
-    version: '3.0', date: 'أبريل 2026', color: '#f0fdf4', badgeColor: '#22c55e',
-    features: [
-      {icon:'💧', title:'نظام دورة مياه الري', desc:'إدارة كاملة لأصحاب حقوق الري — جدول + إشعارات بريدية'},
-      {icon:'🌊', title:'شكوى ري', desc:'نوع طلب جديد في بوابة المواطن'},
-      {icon:'🎭', title:'أدوار مرتبطة بالتصنيفات', desc:'YES/NO لكل تصنيف لكل دور'},
-      {icon:'🏗️', title:'3 بوابات منفصلة', desc:'الرئيسية / الموظفون / الري'},
-      {icon:'❓', title:'دليل المستخدم', desc:'زر ? في كل صفحة'},
-    ]
-  },
-  {
     version: '2.5', date: 'أبريل 2026', color: '#eef5ff', badgeColor: '#3b82f6',
     features: [
       {icon:'📜', title:'إفادة عقارية', desc:'خدمة جديدة — تقديم طلب إفادة عقارية مع قائمة المستندات المطلوبة تلقائياً'},
@@ -4731,6 +4704,8 @@ async function openHelp(page){
   var m=document.getElementById('_hm_d');if(!m){m=document.createElement('div');m.id='_hm_d';m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl';m.innerHTML='<div style="background:#fff;border-radius:20px;max-width:560px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)"><div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;border-radius:20px 20px 0 0;z-index:1"><div style="font-size:15px;font-weight:800;color:#1a6eb5">📖 دليل لوحة التحكم</div><button onclick="document.getElementById(\'_hm_d\').remove()" style="background:#f0f4f8;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px">✕</button></div><div id="_hb_d" style="padding:20px"></div></div>';m.addEventListener('click',function(e){if(e.target===m)m.remove();});document.body.appendChild(m);}document.getElementById('_hb_d').innerHTML=content;m.style.display='flex';
 }
 
+
+function openHelp(p){var c='<b style="color:#1a6eb5;font-size:14px">⚙️ لوحة تحكم موظفي البلدية</b><br><br>📋 <b>الطلبات</b>: ترى فقط التصنيفات المسموحة.<br>➕ <b>إضافة طلب</b>: الاسم والهاتف والنوع إلزامية.<br>👥 <b>المستخدمين</b>: للمدير ورئيس البلدية فقط.<br>🎭 <b>الأدوار</b>: YES/NO لكل ميزة وتصنيف.<br>💧 <b>دورة المياه</b>: المشتركين والجدول والإشعارات.';var m=document.getElementById('_hm');if(!m){m=document.createElement('div');m.id='_hm';m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;direction:rtl';m.innerHTML='<div style="background:#fff;border-radius:16px;padding:20px;max-width:480px;width:100%"><div style="display:flex;justify-content:space-between;margin-bottom:12px;border-bottom:1px solid #eee;padding-bottom:10px"><b style="color:#1a6eb5">📖 دليل لوحة التحكم</b><button onclick="document.getElementById(\'_hm\').remove()" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button></div><div id="_hb" style="font-size:13px;line-height:1.8;color:#444"></div></div>';m.addEventListener('click',function(e){if(e.target===m)m.remove();});document.body.appendChild(m);}document.getElementById('_hb').innerHTML=c;m.style.display='flex';}
 </script>
 </body>
 </html>
