@@ -155,6 +155,29 @@ window.addEventListener('DOMContentLoaded', async function(){
         console.log('Loaded '+_owners.length+' owners from settings fallback');
       }
     }catch(e2){console.log('settings fallback failed:',e2.message);}
+    // Final fallback: localStorage (same GitHub Pages domain as dashboard.html)
+    if(!_owners.length){
+      try{
+        var ls=localStorage.getItem('wadi_irr_owners');
+        if(ls){var lsArr=JSON.parse(ls);
+          if(Array.isArray(lsArr)&&lsArr.length>0){
+            var rawOwners=lsArr.map(function(o){return{id:o.id,name:o.name,phone:o.phone,
+              email:o.email||'',area:o.area||'',
+              land_name:o.landName||o.land_name||'',
+              land_ref:o.landRef||o.land_ref||'',crop:o.crop||'',
+              hours:parseFloat(o.hours)||0,
+              sort_order:parseInt(o.order||o.sort_order)||1,notes:o.notes||''};});
+            // Deduplicate by phone number
+            var seen={};
+            _owners=rawOwners.filter(function(o){
+              var k=(o.phone||'').replace(/[^0-9]/g,'');
+              if(seen[k])return false; seen[k]=true; return true;
+            });
+            console.log('Loaded '+_owners.length+' owners from localStorage (deduped from '+rawOwners.length+')');
+          }
+        }
+      }catch(e3){console.log('localStorage fail:',e3);}
+    }
   }
 
   // Load config: try irr_config table → fallback to settings
