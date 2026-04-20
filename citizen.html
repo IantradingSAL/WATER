@@ -681,7 +681,7 @@ function showPhonePopup() {
 function closePhonePopup() {
   document.getElementById('phone-popup').style.display = 'none';
 }
-async async function confirmPhone(){
+async function confirmPhone(){
   const ref=document.getElementById('track-num').value.toString().trim();
   const phone=(document.getElementById('modal-phone').value||'').replace(/[^0-9+]/g,'').trim();
   const errEl=document.getElementById('phone-err');

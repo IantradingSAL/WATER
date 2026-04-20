@@ -784,7 +784,7 @@ function exportActivityJSON(){const blob=new Blob([JSON.stringify(readLS(APP_ACT
 function exportAuditJSON(){const blob=new Blob([JSON.stringify(readLS(APP_AUDIT_KEY,[]),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='audit_log.json';a.click();URL.revokeObjectURL(a.href);}
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
-async async function doLogin(){
+async function doLogin(){
   const email=document.getElementById('EM').value.trim();
   const pw=document.getElementById('PW').value;
   const errEl=document.getElementById('LERR');
@@ -812,7 +812,7 @@ async function doReset(){
   else{document.getElementById('LERR').style.color='var(--green)';document.getElementById('LERR').textContent='✅ تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك';}
 }
 
-async async function setupUser(user){
+async function setupUser(user){
   currentUser=user;
   userRole=(user.user_metadata&&user.user_metadata.role)||'officer';
   const userName=(user.user_metadata&&user.user_metadata.name)||user.email.split('@')[0];
