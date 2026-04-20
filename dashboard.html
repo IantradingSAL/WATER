@@ -4309,8 +4309,11 @@ async function openWaterSchedule(){
   mt.textContent='💧 نظام دورة الري';
   mb.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)"><div style="font-size:36px">💧</div><div style="margin-top:12px">جاري التحميل…</div></div>';
   ov.classList.add('open');
-  try{await loadIrrData();}catch(e){}
-  renderWaterModal();
+  try{ await loadIrrData(); }catch(e){ console.log('irr load:',e); }
+  try{ renderWaterModal(); }catch(e){ 
+    console.error('renderWaterModal error:',e);
+    mb.innerHTML='<div style="padding:20px;color:var(--danger)">خطأ: '+e.message+'</div>';
+  }
 }
 
 function renderWaterModal(){
@@ -4378,7 +4381,7 @@ function renderWaterModal(){
     '<div style="font-size:11px;font-weight:700;color:#1e5429;margin-bottom:4px">📅 معاينة الدور</div>',
     '<div id="ir-prev-day">☀️ —</div><div id="ir-prev-night">🌙 —</div></div>',
     '<div class="fg"><div class="fl">ملاحظات</div><textarea class="fi" id="ir-notes" rows="2" style="resize:none"></textarea></div>',
-    '<button class="btn bp" data-irr-action="save-owner" style="width:100%;justify-content:center;margin-top:12px">✓ تسجيل</button>',
+    '<button class="btn bp" onclick="saveIrrOwner()" style="width:100%;justify-content:center;margin-top:12px;background:var(--blue);color:#fff;border:none;padding:11px">✓ تسجيل</button>',
     '<div id="ir-msg" style="margin-top:8px;text-align:center;font-size:13px;min-height:18px"></div>',
     '</div></div>',
     // Timeline, Notify, Settings panels
@@ -4497,26 +4500,41 @@ function updateIrrPreview(){
 }
 
 function saveIrrOwner(){
-  var name=(document.getElementById('ir-name')||{value:''}).value.trim();
-  var phone=(document.getElementById('ir-phone')||{value:''}).value.trim();
-  var hours=parseFloat((document.getElementById('ir-hours')||{value:0}).value)||0;
-  var msg=document.getElementById('ir-msg');
-  function setMsg(t,c){if(msg){msg.style.color=c||'var(--danger)';msg.textContent=t;}}
-  if(!name){setMsg('يرجى إدخال الاسم');return;}
-  if(!phone){setMsg('يرجى إدخال الهاتف');return;}
-  if(!hours){setMsg('يرجى إدخال الساعات');return;}
-  if(remainHours()-hours<-0.01){setMsg('تجاوزت الساعات المتاحة!');return;}
-  var o={id:'ir_'+Date.now().toString(36),name:name,phone:phone,
-    email:(document.getElementById('ir-email')||{value:''}).value.trim(),
-    area:(document.getElementById('ir-area')||{value:''}).value.trim(),
-    landName:(document.getElementById('ir-land')||{value:''}).value.trim(),
-    crop:(document.getElementById('ir-crop')||{value:''}).value.trim(),
-    hours:hours,order:parseInt((document.getElementById('ir-order')||{value:1}).value)||1,
-    notes:(document.getElementById('ir-notes')||{value:''}).value.trim()};
-  var arr=irrOwners(); arr.push(o); saveIrrOwners(arr);
-  setMsg('✅ تم تسجيل '+name,'var(--green2)');
-  ['ir-name','ir-phone','ir-email','ir-area','ir-land','ir-crop','ir-notes'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
-  updateWaterBadge(); toast('✅ تم تسجيل '+name);
+  try{
+    var name=(document.getElementById('ir-name')||{value:''}).value.trim();
+    var phone=(document.getElementById('ir-phone')||{value:''}).value.trim();
+    var email=(document.getElementById('ir-email')||{value:''}).value.trim();
+    var area=(document.getElementById('ir-area')||{value:''}).value.trim()||'وادي الست';
+    var land=(document.getElementById('ir-land')||{value:''}).value.trim();
+    var crop=(document.getElementById('ir-crop')||{value:''}).value.trim();
+    var hours=parseFloat((document.getElementById('ir-hours')||{value:0}).value)||0;
+    var order=parseInt((document.getElementById('ir-order')||{value:1}).value)||1;
+    var notes=(document.getElementById('ir-notes')||{value:''}).value.trim();
+    var msg=document.getElementById('ir-msg');
+    function setMsg(t,c){if(msg){msg.style.color=c||'var(--danger)';msg.textContent=t;}}
+    if(!name){setMsg('يرجى إدخال الاسم ← الحقل إلزامي');return;}
+    if(!phone){setMsg('يرجى إدخال الهاتف ← الحقل إلزامي');return;}
+    if(!hours||hours<=0){setMsg('يرجى إدخال الساعات ← يجب أن تكون أكبر من صفر');return;}
+    var rem=remainHours();
+    if(rem-hours<-0.01){setMsg('الساعات المطلوبة ('+hours+') تتجاوز المتبقي ('+rem.toFixed(1)+')!');return;}
+    var o={
+      id:'ir_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,5),
+      name:name,phone:phone,email:email,area:area,
+      landName:land,crop:crop,hours:hours,order:order,notes:notes
+    };
+    var arr=irrOwners(); arr.push(o); saveIrrOwners(arr);
+    toast('✅ تم تسجيل '+name+' بنجاح');
+    setMsg('✅ تم التسجيل بنجاح — سينتقل للقائمة…','var(--green2)');
+    updateWaterBadge();
+    ['ir-name','ir-phone','ir-email','ir-land','ir-crop','ir-notes'].forEach(function(id){
+      var e=document.getElementById(id);if(e)e.value='';
+    });
+    var hEl=document.getElementById('ir-hours');if(hEl)hEl.value='';
+    setTimeout(function(){ try{renderWaterModal();irTab('ir-list');}catch(e){} }, 1200);
+  }catch(err){
+    console.error('saveIrrOwner error:',err);
+    toast('خطأ في التسجيل: '+err.message,'err');
+  }
 }
 
 function delIrrOwner(id,name){
