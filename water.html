@@ -24,7 +24,7 @@ body{font-family:var(--font);direction:rtl;background:var(--bg);min-height:100vh
 .btn-green:hover{background:#0f4d82;}
 </style>
 <style>
-.help-btn{position:fixed;bottom:70px;left:20px;width:44px;height:44px;background:#0891b2;color:#fff;border-radius:50%;border:none;font-size:20px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(8,145,178,.4);z-index:1000;transition:transform .15s;font-family:inherit}
+.help-btn{position:fixed;bottom:70px;right:16px;width:44px;height:44px;background:#1a6eb5;color:#fff;border-radius:50%;border:none;font-size:20px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(26,110,181,.4);z-index:1000;transition:transform .15s;font-family:inherit}.help-btn:hover{transform:scale(1.1)}
 .help-btn:hover{transform:scale(1.1)}
 .help-section{margin-bottom:16px}
 .help-section h3{color:#0891b2;margin:0 0 8px;font-size:15px}
@@ -227,77 +227,14 @@ function lookupWaterOwner(){
   });
   result.innerHTML=html;
 }
+
+function openHelp(page){
+  var content='<div style="padding:4px 0 12px;border-bottom:2px solid #e8f0fc;margin-bottom:12px"><h3 style="color:#1a6eb5;margin:0;font-size:15px;font-weight:800">💧 بوابة الري — لأصحاب حقوق الري</h3></div><div style="margin-bottom:10px"><div style="font-size:13px;font-weight:700;color:#0f4d82;border-right:3px solid #1a6eb5;padding-right:8px;margin-bottom:4px">🔍 الاستعلام</div><div style="font-size:13px;color:#444;line-height:1.7;padding-right:11px">أدخل رقم هاتفك بالتنسيق 03 123456 ثم اضغط بحث</div></div><div style="margin-bottom:10px"><div style="font-size:13px;font-weight:700;color:#0f4d82;border-right:3px solid #1a6eb5;padding-right:8px;margin-bottom:4px">☀️ دورة النهار تبدأ 06</div><div style="font-size:13px;color:#444;line-height:1.7;padding-right:11px">00</div></div><div style="margin-bottom:10px"><div style="font-size:13px;font-weight:700;color:#0f4d82;border-right:3px solid #1a6eb5;padding-right:8px;margin-bottom:4px"> 🌙 دورة الليل تبدأ 18</div><div style="font-size:13px;color:#444;line-height:1.7;padding-right:11px">00 — مدة الدورة الكاملة 160 ساعة</div></div><div style="margin-bottom:10px"><div style="font-size:13px;font-weight:700;color:#0f4d82;border-right:3px solid #1a6eb5;padding-right:8px;margin-bottom:4px">📧 إشعارات تلقائية</div><div style="font-size:13px;color:#444;line-height:1.7;padding-right:11px">قبل يوم، صباح يوم الدور، ساعة قبل البدء (إذا سجّلت بريدك)</div></div><div style="font-size:13px;color:#555;line-height:1.7;margin-bottom:8px">⚠️ رقم غير موجود؟ تواصل مع البلدية لتسجيله </div><div style="font-size:13px;color:#555;line-height:1.7;margin-bottom:8px"> مشكلة في المياه؟ قدّم شكوى ري من بوابة المواطن</div>';
+  var m=document.getElementById('_hm');
+  if(!m){m=document.createElement('div');m.id='_hm';m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl';m.innerHTML='<div style="background:#fff;border-radius:20px;max-width:560px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)"><div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;border-radius:20px 20px 0 0;z-index:1"><div style="font-size:15px;font-weight:800;color:#1a6eb5">📖 دليل بوابة الري</div><button onclick="document.getElementById(\'_hm\').remove()" style="background:#f0f4f8;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px">✕</button></div><div id="_hb" style="padding:20px"></div></div>';m.addEventListener('click',function(e){if(e.target===m)m.remove();});document.body.appendChild(m);}
+  document.getElementById('_hb').innerHTML=content;
+  m.style.display='flex';
+}
 </script>
 
 <script>
-function openHelp(page) {
-  const docs = {
-    water: {
-      title: '📖 دليل بوابة الري',
-      content: `
-        <div class="help-section">
-          <h3>💧 بوابة الري — لأصحاب حقوق الري</h3>
-          <p>هذه الصفحة تتيح لأصحاب حقوق الري الاطلاع على جدول دورتهم دون الحاجة لحساب.</p>
-        </div>
-        <div class="help-section">
-          <h4>🔍 كيفية الاستعلام</h4>
-          <ul>
-            <li>أدخل رقم هاتفك المسجل لدى لجنة الري</li>
-            <li>التنسيق: 03 123456 أو 03123456</li>
-            <li>اضغط Enter أو زر البحث</li>
-          </ul>
-        </div>
-        <div class="help-section">
-          <h4>📅 فهم جدول الدورات</h4>
-          <ul>
-            <li>☀️ <b>دورة النهار</b>: تبدأ الساعة 06:00 صباحاً</li>
-            <li>🌙 <b>دورة الليل</b>: تبدأ الساعة 18:00 مساءً</li>
-            <li>كل دورة لها ترتيب محدد — أنت تعرف رقم دورك من لجنة الري</li>
-          </ul>
-        </div>
-        <div class="help-section">
-          <h4>📧 الإشعارات التلقائية</h4>
-          <p>إذا كان بريدك الإلكتروني مسجلاً، ستصلك إشعارات:</p>
-          <ul>
-            <li>قبل يوم من دورك</li>
-            <li>صباح يوم الدور</li>
-            <li>ساعة قبل البدء</li>
-          </ul>
-        </div>
-        <div class="help-section">
-          <h4>⚠️ مشاكل شائعة</h4>
-          <ul>
-            <li><b>رقم غير موجود</b>: تأكد من التنسيق أو تواصل مع البلدية لتسجيل رقمك</li>
-            <li><b>تغيير في الموعد</b>: راجع الصفحة يوم الدور — قد يتغير الجدول</li>
-            <li><b>مشكلة في المياه</b>: قدّم شكوى ري من بوابة المواطن</li>
-          </ul>
-        </div>
-        <div class="help-section help-note">
-          <b>📞 للتواصل مع لجنة الري:</b> اتصل بمكتب البلدية
-        </div>
-      `
-    }
-  };
-  const doc = docs[page]; if(!doc) return;
-  let modal = document.getElementById('help-modal-water');
-  if (!modal) {
-    modal = document.createElement('div');
-    modal.id = 'help-modal-water';
-    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl';
-    modal.innerHTML = '<div style="background:#fff;border-radius:20px;max-width:560px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;border-radius:20px 20px 0 0;z-index:1">' +
-      '<div id="help-title-water" style="font-size:16px;font-weight:800;color:#0891b2"></div>' +
-      '<button onclick="document.getElementById('help-modal-water').remove()" style="background:#f0f9ff;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>' +
-      '</div><div id="help-body-water" style="padding:20px"></div></div>';
-    modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
-    document.body.appendChild(modal);
-  }
-  document.getElementById('help-title-water').textContent = doc.title;
-  document.getElementById('help-body-water').innerHTML = doc.content;
-  modal.style.display = 'flex';
-}
-</script>
-<button class="help-btn" onclick="openHelp('water')" title="مساعدة">?</button>
-
-</body>
-</html>

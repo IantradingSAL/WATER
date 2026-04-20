@@ -209,7 +209,7 @@ select.fi{cursor:pointer;appearance:none;-webkit-appearance:none;}
 }
 </style>
 <style>
-.help-btn{position:fixed;bottom:70px;left:20px;width:44px;height:44px;background:#1a6eb5;color:#fff;border-radius:50%;border:none;font-size:20px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(26,110,181,.4);z-index:1000;transition:transform .15s;font-family:inherit}
+.help-btn{position:fixed;bottom:70px;right:16px;width:44px;height:44px;background:#1a6eb5;color:#fff;border-radius:50%;border:none;font-size:20px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(26,110,181,.4);z-index:1000;transition:transform .15s;font-family:inherit}.help-btn:hover{transform:scale(1.1)}
 .help-btn:hover{transform:scale(1.1)}
 .help-section{margin-bottom:16px}
 .help-section h3{color:#1a6eb5;margin:0 0 8px;font-size:15px}
@@ -383,12 +383,7 @@ function openManageNews() {
 }
 function toast(m,t='ok'){const el=document.getElementById('toast');el.textContent=m;el.className='toast show '+t;setTimeout(()=>el.className='toast',3000);}
 
-function openHelp(page){
-  var docs={
-    index:{
-      title:'📖 دليل الصفحة الرئيسية',
-      content:'<div class="help-section"><h3>🏛 بوابة بلدية وادي الست</h3><p>نقطة الدخول لجميع خدمات البلدية الرقمية. اختر القسم المناسب.</p></div><div class="help-section"><h4>👥 بوابة المواطن</h4><p>لجميع المواطنين — بدون حساب أو كلمة مرور.</p><ul><li>تقديم شكاوى، رعاية، تراخيص، استفسارات، إفادات عقارية، شكاوى ري</li><li>متابعة حالة الطلب برقم الطلب أو الهاتف</li><li>إشعارات بريدية عند التحديث</li></ul></div><div class="help-section"><h4>🔐 دخول الموظفين</h4><p>لموظفي البلدية فقط — يتطلب حساباً معتمداً.</p><ul><li>كل موظف له دور يحدد صلاحياته</li><li>لطلب حساب: راجع المدير أو رئيس البلدية</li></ul></div><div class="help-section"><h4>💧 بوابة الري</h4><p>لأصحاب حقوق الري — أدخل رقم هاتفك لمعرفة موعد دورك.</p><ul><li>لتسجيل رقمك: تواصل مع مكتب البلدية</li></ul></div><div class="help-section"><h4>✨ ما الجديد</h4><p>آخر التحديثات والميزات المضافة للنظام.</p></div><div class="help-section help-note"><b>📞 للمساعدة التقنية:</b> تواصل مع IanTrading SAL</div>'
-    }
+
   };
   var doc=docs[page]; if(!doc) return;
   var modal=document.getElementById('help-modal');
@@ -405,6 +400,14 @@ function openHelp(page){
   modal.style.display='flex';
 }
 
+
+function openHelp(page){
+  var content='<div style="padding:4px 0 12px;border-bottom:2px solid #e8f0fc;margin-bottom:12px"><h3 style="color:#1a6eb5;margin:0;font-size:15px;font-weight:800">🏛 بوابة بلدية وادي الست</h3></div><div style="margin-bottom:10px"><div style="font-size:13px;font-weight:700;color:#0f4d82;border-right:3px solid #1a6eb5;padding-right:8px;margin-bottom:4px">👥 بوابة المواطن</div><div style="font-size:13px;color:#444;line-height:1.7;padding-right:11px">تقديم الطلبات بدون حساب — شكاوى، رعاية، تراخيص، استفسارات، إفادات، شكاوى ري</div></div><div style="margin-bottom:10px"><div style="font-size:13px;font-weight:700;color:#0f4d82;border-right:3px solid #1a6eb5;padding-right:8px;margin-bottom:4px">🔐 دخول الموظفين</div><div style="font-size:13px;color:#444;line-height:1.7;padding-right:11px">لموظفي البلدية بالبريد وكلمة المرور</div></div><div style="margin-bottom:10px"><div style="font-size:13px;font-weight:700;color:#0f4d82;border-right:3px solid #1a6eb5;padding-right:8px;margin-bottom:4px">💧 بوابة الري</div><div style="font-size:13px;color:#444;line-height:1.7;padding-right:11px">لأصحاب حقوق الري — أدخل رقم هاتفك</div></div><div style="margin-bottom:10px"><div style="font-size:13px;font-weight:700;color:#0f4d82;border-right:3px solid #1a6eb5;padding-right:8px;margin-bottom:4px">✨ ما الجديد</div><div style="font-size:13px;color:#444;line-height:1.7;padding-right:11px">آخر التحديثات</div></div>';
+  var m=document.getElementById('_hm');
+  if(!m){m=document.createElement('div');m.id='_hm';m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl';m.innerHTML='<div style="background:#fff;border-radius:20px;max-width:560px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)"><div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;border-radius:20px 20px 0 0;z-index:1"><div style="font-size:15px;font-weight:800;color:#1a6eb5">📖 دليل الصفحة الرئيسية</div><button onclick="document.getElementById(\'_hm\').remove()" style="background:#f0f4f8;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px">✕</button></div><div id="_hb" style="padding:20px"></div></div>';m.addEventListener('click',function(e){if(e.target===m)m.remove();});document.body.appendChild(m);}
+  document.getElementById('_hb').innerHTML=content;
+  m.style.display='flex';
+}
 </script>
 </body>
 </html>

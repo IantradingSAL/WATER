@@ -209,7 +209,7 @@ select.fi{cursor:pointer;appearance:none;-webkit-appearance:none;}
 }
 </style>
 <style>
-.help-btn{position:fixed;bottom:70px;left:16px;width:44px;height:44px;background:#1a6eb5;color:#fff;border-radius:50%;border:none;font-size:20px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(26,110,181,.4);z-index:1000;transition:transform .15s;font-family:var(--font)}
+.help-btn{position:fixed;bottom:70px;right:16px;width:44px;height:44px;background:#1a6eb5;color:#fff;border-radius:50%;border:none;font-size:20px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(26,110,181,.4);z-index:1000;transition:transform .15s;font-family:inherit}.help-btn:hover{transform:scale(1.1)}
 .help-btn:hover{transform:scale(1.1)}
 </style>
 </head>
@@ -1073,21 +1073,17 @@ function loadCats(){ return loadCatsFromSupabase(); }
 function setupCitizenPortal(){ updateCitizenTypeSelect(); }
 
 
-function openHelp(p){
-  var c='<div style="margin-bottom:14px"><h3 style="color:#1a6eb5;margin:0 0 8px;font-size:15px">👥 بوابة المواطن — بلدية وادي الست</h3><p style="font-size:13px;color:#444;line-height:1.7">تقديم الطلبات ومتابعتها بدون حساب.</p></div>'+
-  '<div style="margin-bottom:12px"><h4 style="color:#0f4d82;font-size:14px;border-right:3px solid #1a6eb5;padding-right:8px;margin:0 0 6px">📋 تقديم طلب جديد</h4><ul style="padding-right:18px;font-size:13px;color:#555;line-height:1.8"><li>اسمك + هاتفك إلزاميان</li><li>اختر النوع — تظهر المستندات المطلوبة تلقائياً</li><li>احتفظ بالرقم المرجعي بعد الإرسال</li></ul></div>'+
-  '<div style="margin-bottom:12px"><h4 style="color:#0f4d82;font-size:14px;border-right:3px solid #1a6eb5;padding-right:8px;margin:0 0 6px">🔍 متابعة طلب</h4><ul style="padding-right:18px;font-size:13px;color:#555;line-height:1.8"><li>أدخل رقم الطلب + هاتفك للتحقق</li><li>تظهر الحالة والتحديثات</li></ul></div>'+
-  '<div style="margin-bottom:12px"><h4 style="color:#0f4d82;font-size:14px;border-right:3px solid #1a6eb5;padding-right:8px;margin:0 0 6px">💬 التواصل مع البلدية</h4><p style="font-size:13px;color:#555">ردود البلدية تظهر في تفاصيل طلبك. يمكنك إضافة ملاحظات أو مستندات جديدة من صفحة متابعة الطلب.</p></div>'+
-  '<div style="margin-bottom:12px"><h4 style="color:#0f4d82;font-size:14px;border-right:3px solid #1a6eb5;padding-right:8px;margin:0 0 6px">📂 أنواع الطلبات</h4><ul style="padding-right:18px;font-size:13px;color:#555;line-height:1.8"><li>⚠️ شكوى (3-5 أيام)</li><li>🤝 رعاية (5-7 أيام)</li><li>🏗️ ترخيص (7-14 يوم)</li><li>❓ استفسار (1-2 يوم)</li><li>📜 إفادة عقارية (5-10 أيام)</li><li>💧 شكوى ري (2-4 أيام)</li></ul></div>'+
-  '<div style="background:#f0f7ff;border:1px solid #bee3f8;border-radius:8px;padding:10px 12px;font-size:13px"><b style="color:#1a6eb5">📞 للمساعدة:</b> تواصل مع مكتب بلدية وادي الست</div>';
-  var m=document.getElementById('hm-cit');
-  if(!m){m=document.createElement('div');m.id='hm-cit';m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl';
-  m.innerHTML='<div style="background:#fff;border-radius:20px;max-width:540px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)"><div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;border-radius:20px 20px 0 0;z-index:1"><div style="font-size:16px;font-weight:800;color:#1a6eb5">📖 دليل بوابة المواطن</div><button onclick="document.getElementById(\'hm-cit\').remove()" style="background:#f0f4f8;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px">✕</button></div><div style="padding:20px" id="hb-cit"></div></div>';
-  m.addEventListener('click',function(e){if(e.target===m)m.remove();});document.body.appendChild(m);}
-  document.getElementById('hb-cit').innerHTML=c;m.style.display='flex';
+
+
+
+
+function openHelp(page){
+  var content='<div style="padding:4px 0 12px;border-bottom:2px solid #e8f0fc;margin-bottom:12px"><h3 style="color:#1a6eb5;margin:0;font-size:15px;font-weight:800">👥 بوابة المواطن</h3></div><div style="margin-bottom:10px"><div style="font-size:13px;font-weight:700;color:#0f4d82;border-right:3px solid #1a6eb5;padding-right:8px;margin-bottom:4px">📋 تقديم طلب</div><div style="font-size:13px;color:#444;line-height:1.7;padding-right:11px">اسمك + هاتفك إلزاميان، اختر النوع لترى المستندات المطلوبة، احتفظ بالرقم المرجعي</div></div><div style="margin-bottom:10px"><div style="font-size:13px;font-weight:700;color:#0f4d82;border-right:3px solid #1a6eb5;padding-right:8px;margin-bottom:4px">🔍 متابعة طلب</div><div style="font-size:13px;color:#444;line-height:1.7;padding-right:11px">أدخل الرقم المرجعي + رقم هاتفك للتحقق</div></div><div style="margin-bottom:10px"><div style="font-size:13px;font-weight:700;color:#0f4d82;border-right:3px solid #1a6eb5;padding-right:8px;margin-bottom:4px">👤 حسابي</div><div style="font-size:13px;color:#444;line-height:1.7;padding-right:11px">تسجيل دخول بالبريد وكلمة المرور</div></div><div style="margin-bottom:10px"><div style="font-size:13px;font-weight:700;color:#0f4d82;border-right:3px solid #1a6eb5;padding-right:8px;margin-bottom:4px">⚠️ شكوى</div><div style="font-size:13px;color:#444;line-height:1.7;padding-right:11px">3-5 أيام</div></div><div style="margin-bottom:10px"><div style="font-size:13px;font-weight:700;color:#0f4d82;border-right:3px solid #1a6eb5;padding-right:8px;margin-bottom:4px"> 🤝 رعاية</div><div style="font-size:13px;color:#444;line-height:1.7;padding-right:11px">5-7</div></div><div style="margin-bottom:10px"><div style="font-size:13px;font-weight:700;color:#0f4d82;border-right:3px solid #1a6eb5;padding-right:8px;margin-bottom:4px"> 🏗️ ترخيص</div><div style="font-size:13px;color:#444;line-height:1.7;padding-right:11px">7-14</div></div><div style="margin-bottom:10px"><div style="font-size:13px;font-weight:700;color:#0f4d82;border-right:3px solid #1a6eb5;padding-right:8px;margin-bottom:4px"> ❓ استفسار</div><div style="font-size:13px;color:#444;line-height:1.7;padding-right:11px">1-2</div></div><div style="margin-bottom:10px"><div style="font-size:13px;font-weight:700;color:#0f4d82;border-right:3px solid #1a6eb5;padding-right:8px;margin-bottom:4px"> 📜 إفادة</div><div style="font-size:13px;color:#444;line-height:1.7;padding-right:11px">5-10</div></div><div style="margin-bottom:10px"><div style="font-size:13px;font-weight:700;color:#0f4d82;border-right:3px solid #1a6eb5;padding-right:8px;margin-bottom:4px"> 💧 ري</div><div style="font-size:13px;color:#444;line-height:1.7;padding-right:11px">2-4</div></div>';
+  var m=document.getElementById('_hm');
+  if(!m){m=document.createElement('div');m.id='_hm';m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl';m.innerHTML='<div style="background:#fff;border-radius:20px;max-width:560px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)"><div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;border-radius:20px 20px 0 0;z-index:1"><div style="font-size:15px;font-weight:800;color:#1a6eb5">📖 دليل بوابة المواطن</div><button onclick="document.getElementById(\'_hm\').remove()" style="background:#f0f4f8;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px">✕</button></div><div id="_hb" style="padding:20px"></div></div>';m.addEventListener('click',function(e){if(e.target===m)m.remove();});document.body.appendChild(m);}
+  document.getElementById('_hb').innerHTML=content;
+  m.style.display='flex';
 }
-
-
 </script>
 </body>
 </html>
