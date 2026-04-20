@@ -344,7 +344,8 @@ select.fi{cursor:pointer;appearance:none;-webkit-appearance:none;}
   </div>
 </div>
 <button class="help-btn" onclick="openHelp('c')" title="مساعدة">?</button>
-<script>
+<script>var OFFICERS = [];
+
 const SUPABASE_URL='https://onjbwhkmmtqnymhjnplw.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9uamJ3aGttbXRxbnltaGpucGx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDY4MjUsImV4cCI6MjA5MDM4MjgyNX0.lhlsRdOqVHZuOXCJa0lCNuZkYJHhf1AZ_zOwqHHAeG4';
 const MUN_ID='00000000-0000-0000-0000-000000000001';
@@ -444,6 +445,16 @@ const REQUIRED_DOCS = {
       {name: 'صورة عن الهوية الشخصية', required: false, icon: '🪪'},
     ]
   },
+  water: {
+    label: 'شكوى ري',
+    icon: '💧',
+    description: 'شكوى تتعلق بمياه الري — وضّح المشكلة وموقعها',
+    docs: [
+      {name: 'صورة عن الهوية الشخصية', required: true,  icon: '🪪'},
+      {name: 'وصف المشكلة والموقع',      required: true,  icon: '📝'},
+      {name: 'صور توضيحية للمشكلة',     required: false, icon: '📸'},
+    ]
+  }
 };
 
 function toast(m,t='ok'){const el=document.getElementById('toast');el.textContent=m;el.className='toast show '+t;setTimeout(()=>el.className='toast',3000);}
@@ -751,7 +762,7 @@ async function doSubmitCit(){
   const today=new Date().toISOString().slice(0,10);
   const na=['permit','welfare'].includes(type);
   const nc={name,phone,email,address:addr,type:type,description:desc,priority:'medium',
-    assigned:OFFICERS[0]||'',status:na?'pending-approval':'new',
+    assigned:'',status:na?'pending-approval':'new',
     approval_state:na?'pending':null,approval_by:null,approval_date:null,
     timeline:[{a:'تم تقديم الطلب عبر الموقع الإلكتروني',by:name,d:today,cls:''}],
     documents:[],source:'website'};
