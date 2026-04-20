@@ -209,46 +209,18 @@ select.fi{cursor:pointer;appearance:none;-webkit-appearance:none;}
 }
 </style>
 <style>
-/* ── CITIZEN PAGE EXTRA ── */
-body { background: var(--bg); min-height:100vh; }
-.page-header {
-  background: linear-gradient(120deg, var(--blue2), var(--blue) 60%, var(--green2));
-  color:#fff; padding:14px 22px; display:flex; align-items:center; gap:12px;
-  position:sticky; top:0; z-index:100;
-}
-.page-header img { height:40px; }
-.page-header-title { font-size:16px;font-weight:800; }
-.page-header-sub { font-size:11px;opacity:.7; }
-.back-link {
-  margin-right:auto; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25);
-  color:#fff; padding:6px 14px; border-radius:20px; cursor:pointer; font-size:12px;
-  font-family:var(--font); text-decoration:none; display:flex; align-items:center; gap:5px;
-}
-.cit-container { max-width:600px; margin:0 auto; padding:20px 16px; }
-/* Override CP display */
-#CP { display:flex !important; flex-direction:column; min-height:unset; background:transparent; }
-#CP > .min-h-screen { min-height:unset !important; }
+.help-btn{position:fixed;bottom:70px;left:16px;width:44px;height:44px;background:#1a6eb5;color:#fff;border-radius:50%;border:none;font-size:20px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(26,110,181,.4);z-index:1000;transition:transform .15s;font-family:var(--font)}
+.help-btn:hover{transform:scale(1.1)}
 </style>
 </head>
 <body>
 
-<!-- Page Header -->
-<div class="page-header">
-  <img src="data:image/png;base64,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" alt="شعار بلدية وادي الست">
-  <div>
-    <div class="page-header-title">بوابة المواطن</div>
-    <div class="page-header-sub">بلدية وادي الست</div>
-  </div>
-  <a href="index.html" class="back-link">← الرئيسية</a>
-</div>
-
-<!-- Full Citizen Portal (extracted from main app) -->
-<div id="CP" style="display:flex;flex-direction:column">
+id="CP" style="display:block">
 <div style="min-height:100vh;background:var(--bg)">
   <div style="background:linear-gradient(120deg,var(--blue2),var(--blue) 60%,var(--green2));color:#fff;padding:14px 22px;display:flex;align-items:center;gap:14px">
     <img src="data:image/png;base64,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" style="height:46px">
     <div><div style="font-size:15px;font-weight:800">بلدية وادي الست</div><div style="font-size:11px;opacity:0.6">قضاء الشوف · جبل لبنان</div></div>
-    <button onclick="window.location='index.html'" style="margin-right:auto;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:6px 14px;cursor:pointer;font-family:var(--font);font-size:13px">← الرئيسية</button>
+    <button onclick="showLanding()" style="margin-right:auto;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:6px 14px;cursor:pointer;font-family:var(--font);font-size:13px">← الرئيسية</button>
   </div>
   <div style="max-width:620px;margin:28px auto;padding:0 16px">
 
@@ -317,7 +289,9 @@ body { background: var(--bg); min-height:100vh; }
       <div style="display:flex;align-items:center;gap:6px;margin-top:5px;margin-bottom:2px;font-size:12px;color:var(--green2)">📧 سيتم إرسال إشعار إلكتروني إلى بريدك لتأكيد استلام طلبك</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:13px">
         <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:5px">نوع الطلب *</div>
-          <select id="c-type" class="fi" style="appearance:none;-webkit-appearance:none" onchange="showRequiredDocs(this.value)"></select></div>
+          <select id="c-type" class="fi" style="appearance:none;-webkit-appearance:none" onchange="showRequiredDocs(this.value)">
+            ${(typeof getCats==='function'?getCats():[{id:'complaint',icon:'⚠️',label:'شكوى'},{id:'welfare',icon:'🤝',label:'رعاية اجتماعية'},{id:'permit',icon:'🏗️',label:'ترخيص'},{id:'inquiry',icon:'❓',label:'استفسار'}]).map(function(c){return '<option value="'+c.id+'">'+c.icon+' '+c.label+'</option>';}).join('')}
+            </select></div>
       <div id="required-docs-box" style="display:none;margin:4px 0 12px;border-radius:10px;overflow:hidden;font-size:13px"></div>
         <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:5px">العنوان</div>
           <input type="text" id="c-addr" class="fi" placeholder="حارة، منطقة…"></div>
@@ -359,20 +333,83 @@ body { background: var(--bg); min-height:100vh; }
       <button onclick="resetCit()" style="padding:11px 24px;border:2px solid var(--blue);background:transparent;color:var(--blue);border-radius:10px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer">+ تقديم طلب جديد</button>
     </div>
 
+  </div
+  <!-- CITIZEN LOGIN -->
+  <div id="cit-login-form" style="display:none;max-width:400px;margin:0 auto;padding:20px">
+    <button onclick="showCitizenHero()" style="background:none;border:none;color:var(--blue);font-family:var(--font);font-size:14px;cursor:pointer;padding:0;margin-bottom:12px">← رجوع</button>
+    <div style="background:#fff;border-radius:16px;padding:24px;box-shadow:0 2px 16px rgba(0,0,0,.07);border:1px solid var(--border)">
+      <div style="font-size:18px;font-weight:800;color:var(--blue2);margin-bottom:16px;text-align:center">🔐 تسجيل الدخول</div>
+      <div class="fg"><div class="fl">البريد الإلكتروني</div><input type="email" id="cit-em" class="fi" placeholder="email@example.com" style="direction:ltr"></div>
+      <div class="fg"><div class="fl">كلمة المرور</div><input type="password" id="cit-pw" class="fi" placeholder="••••••••" style="direction:ltr" onkeydown="if(event.key==='Enter')citLogin()"></div>
+      <div id="cit-err" style="color:var(--danger);font-size:13px;margin-bottom:8px;min-height:18px;text-align:center"></div>
+      <button onclick="citLogin()" style="width:100%;padding:12px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer">دخول</button>
+      <div style="text-align:center;margin-top:12px;font-size:13px;color:var(--text3)">ليس لديك حساب؟ <a onclick="showCitizenRegister()" style="color:var(--blue);cursor:pointer;font-weight:700">إنشاء حساب</a></div>
+    </div>
   </div>
+
+  <!-- CITIZEN REGISTER -->
+  <div id="cit-reg-form" style="display:none;max-width:400px;margin:0 auto;padding:20px">
+    <button onclick="showCitizenLogin()" style="background:none;border:none;color:var(--blue);font-family:var(--font);font-size:14px;cursor:pointer;padding:0;margin-bottom:12px">← رجوع</button>
+    <div style="background:#fff;border-radius:16px;padding:24px;box-shadow:0 2px 16px rgba(0,0,0,.07);border:1px solid var(--border)">
+      <div style="font-size:18px;font-weight:800;color:var(--blue2);margin-bottom:16px;text-align:center">👤 إنشاء حساب</div>
+      <div class="fg"><div class="fl">الاسم الكامل *</div><input type="text" id="cit-name" class="fi" placeholder="اسمك الكامل"></div>
+      <div class="fg"><div class="fl">رقم الهاتف</div><input type="tel" id="cit-phone" class="fi" placeholder="03 123456" style="direction:ltr"></div>
+      <div class="fg"><div class="fl">البريد الإلكتروني *</div><input type="email" id="cit-rem" class="fi" placeholder="email@example.com" style="direction:ltr"></div>
+      <div class="fg"><div class="fl">كلمة المرور * (8 أحرف+)</div><input type="password" id="cit-rpw" class="fi" placeholder="••••••••" style="direction:ltr"></div>
+      <div id="cit-rerr" style="color:var(--danger);font-size:13px;margin-bottom:8px;min-height:18px;text-align:center"></div>
+      <button onclick="citRegister()" style="width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:10px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer">إنشاء الحساب</button>
+    </div>
+  </div>
+
+  <!-- CITIZEN DASHBOARD -->
+  <div id="cit-dashboard" style="display:none;max-width:540px;margin:0 auto;padding:16px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;background:#fff;border-radius:14px;padding:14px 16px;border:1px solid var(--border)">
+      <div id="cit-av" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0"></div>
+      <div><div id="cit-welcome" style="font-weight:700;font-size:14px;color:var(--blue2)"></div>
+        <div style="font-size:12px;color:var(--text3)">طلباتك</div></div>
+      <button onclick="citLogout()" style="margin-right:auto;padding:6px 12px;border:1px solid var(--border);background:none;border-radius:8px;font-family:var(--font);font-size:12px;cursor:pointer;color:var(--text2)">خروج</button>
+    </div>
+    <button onclick="openCitAdd()" style="width:100%;padding:12px;background:var(--blue);color:#fff;border:none;border-radius:12px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;margin-bottom:14px">➕ طلب جديد</button>
+    <div id="cit-cases"></div>
+  </div>
+
+  <!-- CIT ADD FORM -->
+  <div id="cit-add-form" style="display:none;max-width:540px;margin:0 auto;padding:16px">
+    <button onclick="document.getElementById('cit-add-form').style.display='none';document.getElementById('cit-dashboard').style.display='block'" style="background:none;border:none;color:var(--blue);font-family:var(--font);font-size:14px;cursor:pointer;padding:0;margin-bottom:12px">← رجوع</button>
+    <div class="fg"><div class="fl">نوع الطلب *</div><select id="cit-type-2" class="fi" style="appearance:none;-webkit-appearance:none"></select></div>
+    <div class="fg"><div class="fl">الوصف *</div><textarea id="cit-desc-2" class="fi" rows="4" placeholder="اشرح طلبك..." style="resize:none"></textarea></div>
+    <div class="fg"><div class="fl">العنوان</div><input type="text" id="cit-addr-2" class="fi" placeholder="حارة، منطقة…"></div>
+    <input type="file" id="cit-update-files" multiple accept="image/*,.pdf,.doc,.docx" style="display:none" onchange="showCitUpdateFiles(this)">
+    <div id="cit-update-file-list"></div>
+    <div id="cit-update-msg" style="font-size:13px;margin:8px 0;min-height:18px;text-align:center"></div>
+    <button onclick="submitCitCase()" style="width:100%;padding:12px;background:linear-gradient(120deg,var(--blue),var(--blue2));color:#fff;border:none;border-radius:12px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer">📤 إرسال</button>
+  </div>
+
 </div>
 </div>
 
 
-<!-- Popups -->
+id="wn-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)closeWnModal()">
+  <div style="background:#fff;border-radius:20px;max-width:520px;width:100%;max-height:85vh;overflow-y:auto;direction:rtl;box-shadow:0 20px 60px rgba(0,0,0,.25)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:1;border-radius:20px 20px 0 0">
+      <button onclick="closeWnModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">✕</button>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:18px;font-weight:800;color:#1a1a2e">ما الجديد</span>
+        <span style="font-size:22px">✨</span>
+      </div>
+    </div>
+    <div id="wn-modal-body" style="padding:16px 20px"></div>
+  </div>
 
+<button class="help-btn" onclick="openHelp('citizen')" title="مساعدة">?</button>
 
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+
+
+
 // ── PAGE CONFIG ───────────────────────────────────────────────────────────────
-const SB_URL = '__SUPABASE_URL__';
-const SB_KEY = '__SUPABASE_ANON_KEY__';
+const SB_URL = 'https://onjbwhkmmtqnymhjnplw.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9uamJ3aGttbXRxbnltaGpucGx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDY4MjUsImV4cCI6MjA5MDM4MjgyNX0.lhlsRdOqVHZuOXCJa0lCNuZkYJHhf1AZ_zOwqHHAeG4';
 const MUN_ID = '00000000-0000-0000-0000-000000000001';
 const BKEY = 'xsmtpsib-0421702005db0037488fcf8571d71affe52db33a95300e80847392294f871b55-fxFDF0zqQLSVMDAA';
 const FROM_NAME = 'بلدية وادي الست';
@@ -414,9 +451,7 @@ window.addEventListener('DOMContentLoaded', async function() {
     dbR = true;
   } catch(e) { console.error('SB init:', e.message); }
   
-  // Show citizen portal
-  var cp = document.getElementById('CP');
-  if (cp) cp.style.display = 'flex';
+  showCitizenHero();
   
   await loadCats();
   // Populate type select (can't use template literals in static HTML)
@@ -428,7 +463,8 @@ window.addEventListener('DOMContentLoaded', async function() {
       {id:'welfare',icon:'🤝',label:'رعاية اجتماعية'},
       {id:'permit',icon:'🏗️',label:'ترخيص'},
       {id:'inquiry',icon:'❓',label:'استفسار'},
-      {id:'ifada',icon:'📜',label:'إفادة عقارية'}
+      {id:'ifada',icon:'📜',label:'إفادة عقارية'},
+      {id:'water',icon:'💧',label:'شكوى ري'}
     ];
     try { var stored = localStorage.getItem('wadi_cats'); if(stored) cats = JSON.parse(stored); } catch(e){}
     sel.innerHTML = cats.map(function(c){ return '<option value="'+c.id+'">'+c.icon+' '+c.label+'</option>'; }).join('');
@@ -456,26 +492,9 @@ var NA=['permit','welfare'];
 // ── CITIZEN PORTAL ────────────────────────────────────────────────────────────
 var citUser = null;
 
-function showLanding(){
-  var wp=document.getElementById("WATER-PORTAL");if(wp)wp.style.display="none";
-  var wc=document.getElementById("WELCOME-CARDS");if(wc)wc.style.display="flex";
-  document.getElementById('LANDING').style.display='flex';
-  document.getElementById('LS').style.display='none';
-  document.getElementById('CP').style.display='none';
-  document.getElementById('APP').style.display='none';
-}
-function showCitizenPortal(){
-  updateCitizenTypeSelect();
-  document.getElementById('LANDING').style.display='none';
-  document.getElementById('CP').style.display='block';
-  document.getElementById('LS').style.display='none';
-  showCitizenHero();
-}
-function showStaffLogin(){
-  document.getElementById('LANDING').style.display='none';
-  document.getElementById('CP').style.display='none';
-  document.getElementById('LS').style.display='flex';
-}
+function showLanding(){ window.location='index.html'; }
+function showCitizenPortal(){ updateCitizenTypeSelect(); showCitizenHero(); }
+function showStaffLogin(){ window.location='dashboard.html'; }
 function showCitizenHero(){
   document.getElementById('cit-hero').style.display='block';
   document.getElementById('cit-login-form').style.display='none';
@@ -932,9 +951,9 @@ async function submitCitCase(){
 }
 
 async function citLogout(){
-  if(dbR)await sb.auth.signOut();
+  if(dbR) sb.auth.signOut().catch(function(){});
   citUser=null;
-  showLanding();
+  window.location='index.html';
 }
 
 // Override window load to show landing
@@ -1150,8 +1169,46 @@ function buildCitizenEmail(caseId, name, type, status) {
       </table>
       <p style="font-size:13px;color:#666">احتفظ بالرقم المرجعي لمتابعة طلبك لاحقاً.</p>
     </div>
-    <div class="ft">بلدية وادي الست · قضاء الشوف · جبل لبنان<br>Powered by IanTrading SAL © 2026</div>
-  </div></body></html>`;
+    
+  <!-- CHAT WITH MUNICIPALITY -->
+  <div id="chat-section" style="max-width:640px;margin:0 auto;padding:0 16px 100px">
+    <div style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden">
+      <div style="background:linear-gradient(120deg,var(--blue2),var(--blue));color:#fff;padding:12px 16px;font-weight:800;font-size:14px;display:flex;align-items:center;gap:8px">
+        💬 تواصل مع البلدية
+        <span style="margin-right:auto;font-size:11px;opacity:.8;font-weight:400">نردّ خلال أوقات الدوام</span>
+      </div>
+      <div style="padding:14px">
+        <a href="https://wa.me/96170000000?text=مرحباً، أود الاستفسار عن..." target="_blank"
+           style="display:flex;align-items:center;gap:12px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px 14px;margin-bottom:10px;text-decoration:none">
+          <span style="font-size:26px">📱</span>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#1e5429">واتساب مباشر</div>
+            <div style="font-size:12px;color:#4a7c59">للردّ السريع — اضغط للمراسلة</div>
+          </div>
+          <span style="margin-right:auto;background:#22c55e;color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:700">مفتوح</span>
+        </a>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:6px;text-transform:uppercase">أو أرسل رسالة نصية</div>
+          <textarea id="chat-msg" rows="3" placeholder="اكتب سؤالك أو ملاحظتك هنا…"
+            style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:var(--font);font-size:14px;resize:none;outline:none;box-sizing:border-box"
+            onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <input id="chat-name" type="text" placeholder="اسمك" class="fi" style="flex:1;height:auto;padding:9px 12px">
+            <input id="chat-phone" type="tel" placeholder="03 123456" class="fi" style="flex:1;height:auto;padding:9px 12px;direction:ltr">
+          </div>
+          <button onclick="sendChatMsg()" style="width:100%;margin-top:8px;padding:11px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">
+            📨 إرسال الرسالة
+          </button>
+          <div id="chat-result" style="margin-top:8px;font-size:13px;text-align:center;min-height:18px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="ft">بلدية وادي الست · قضاء الشوف · جبل لبنان<br>Powered by IanTrading SAL © 2026</div>
+  </div><button class="help-btn" onclick="openHelp('citizen')" title="مساعدة">?</button>
+<button class="help-btn" onclick="openHelp('citizen')" title="مساعدة">?</button>
+</body></html>`;
 }
 
 function buildStatusEmail(caseId, name, newStatus, publicNote) {
@@ -1269,7 +1326,15 @@ var REQUIRED_DOCS = {
     docs: [
       {name: 'صورة عن الهوية الشخصية', required: false, icon: '🪪'},
     ]
-  },
+  },,
+  water: {
+    label: 'شكوى ري', icon: '💧',
+    description: 'لتقديم شكوى تتعلق بمياه الري أو الجدول الزمني',
+    docs: [
+      {name: 'صورة عن الهوية الشخصية', required: true, icon: '🪪'},
+      {name: 'رقم القطعة أو اسم الأرض', required: false, icon: '🌿'}
+    ]
+  }
 };
 
 // Show required docs when citizen selects a type
@@ -1991,6 +2056,146 @@ function getDbType(catId) {
   if (l.includes('إفاد')||l.includes('افاد')) return 'ifada';
   return 'complaint';
 }
+
+function openHelp(page){
+  var docs={citizen:{title:'📖 دليل بوابة المواطن',content:'<div class="help-section"><h3>👥 بوابة المواطن</h3><p>قدّم طلباتك وتابعها بدون حساب أو كلمة مرور.</p></div><div class="help-section"><h4>📋 تقديم طلب</h4><ul><li><b>الاسم</b>: اسمك الكامل</li><li><b>الهاتف</b>: للتواصل ومتابعة الطلب</li><li><b>نوع الطلب</b>: اختر المناسب ← تظهر المستندات المطلوبة تلقائياً</li><li><b>الوصف</b>: اشرح طلبك بوضوح</li></ul></div><div class="help-section"><h4>📂 الأنواع</h4><ul><li>⚠️ شكوى · 🤝 رعاية · 🏗️ ترخيص · ❓ استفسار · 📜 إفادة عقارية · 💧 شكوى ري</li></ul></div><div class="help-section"><h4>🔍 متابعة الطلب</h4><p>أدخل الرقم المرجعي مع رقم هاتفك للاطلاع على حالة طلبك.</p></div><div class="help-section"><h4>💬 تواصل</h4><p>استخدم قسم التواصل أسفل الصفحة — واتساب مباشر أو رسالة نصية.</p></div><div class="help-section help-note"><b>⏱️ أوقات الرد:</b> استفسارات 1-2 يوم · شكاوى 3-5 أيام · تراخيص 7-14 يوم</div>'}};
+  var doc=docs[page];if(!doc)return;
+  var modal=document.getElementById('help-modal-cit');
+  if(!modal){modal=document.createElement('div');modal.id='help-modal-cit';
+    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl';
+    modal.innerHTML='<div style="background:#fff;border-radius:20px;max-width:560px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)"><div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;border-radius:20px 20px 0 0;z-index:1"><div id="help-title-cit" style="font-size:16px;font-weight:800;color:#1a6eb5"></div><button onclick="document.getElementById('help-modal-cit').remove()" style="background:#f0f4f8;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px">✕</button></div><div id="help-body-cit" style="padding:20px"></div></div>';
+    modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});document.body.appendChild(modal);}
+  document.getElementById('help-title-cit').textContent=doc.title;
+  document.getElementById('help-body-cit').innerHTML=doc.content;
+  modal.style.display='flex';
+}
+
+
+
+// ── HELP SYSTEM ──────────────────────────────────────────────────────────────
+function openHelp(page){
+  var docs={citizen:{title:'📖 دليل بوابة المواطن',
+    content:'<div class="help-section"><h3>👥 بوابة المواطن — بلدية وادي الست</h3><p>قدّم طلباتك وتابعها بدون حساب أو كلمة مرور.</p></div>'+
+    '<div class="help-section"><h4>📋 تقديم طلب جديد</h4><ul>'+
+    '<li><b>الاسم الكامل</b>: مطلوب للتواصل</li>'+
+    '<li><b>الهاتف</b>: لمتابعة الطلب وإرسال الإشعارات</li>'+
+    '<li><b>نوع الطلب</b>: اختره ← تظهر المستندات المطلوبة تلقائياً</li>'+
+    '<li><b>الوصف</b>: اشرح المشكلة بوضوح وتفصيل</li>'+
+    '<li><b>الملفات</b>: ارفع الصور أو المستندات الداعمة</li></ul></div>'+
+    '<div class="help-section"><h4>📂 أنواع الطلبات</h4><ul>'+
+    '<li>⚠️ <b>شكوى</b>: مشاكل خدمات أو بنية تحتية</li>'+
+    '<li>🤝 <b>رعاية</b>: دعم اجتماعي</li>'+
+    '<li>🏗️ <b>ترخيص</b>: رخص بناء وأعمال</li>'+
+    '<li>❓ <b>استفسار</b>: أسئلة للبلدية</li>'+
+    '<li>📜 <b>إفادة عقارية</b>: وثائق الملكية</li>'+
+    '<li>💧 <b>شكوى ري</b>: مشاكل مياه الري</li></ul></div>'+
+    '<div class="help-section"><h4>🔍 متابعة الطلب</h4>'+
+    '<p>أدخل الرقم المرجعي مع رقم هاتفك للاطلاع على حالة طلبك ومحادثاته.</p></div>'+
+    '<div class="help-section"><h4>💬 التواصل المباشر</h4>'+
+    '<p>استخدم قسم "تواصل مع البلدية" أسفل الصفحة — واتساب أو رسالة نصية.</p></div>'+
+    '<div class="help-section help-note"><b>⏱️ أوقات المعالجة:</b><br>استفسارات: 1-2 يوم · شكاوى: 3-5 أيام · تراخيص: 7-14 يوم · إفادات: 5-10 أيام</div>'}};
+  var doc=docs[page];if(!doc)return;
+  var modal=document.getElementById('help-modal-cit');
+  if(!modal){
+    modal=document.createElement('div');modal.id='help-modal-cit';
+    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl';
+    modal.innerHTML='<div style="background:#fff;border-radius:20px;max-width:560px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;border-radius:20px 20px 0 0;z-index:1">'+
+      '<div id="help-title-cit" style="font-size:16px;font-weight:800;color:#1a6eb5"></div>'+
+      '<button onclick="document.getElementById(\'help-modal-cit\').remove()" style="background:#f0f4f8;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px">✕</button>'+
+      '</div><div id="help-body-cit" style="padding:20px"></div></div>';
+    modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
+    document.body.appendChild(modal);
+  }
+  document.getElementById('help-title-cit').textContent=doc.title;
+  document.getElementById('help-body-cit').innerHTML=doc.content;
+  modal.style.display='flex';
+}
+
+
+
+
+
+);
+  chatMsgs.push({from:'citizen',text:msg,time:t});
+  inp.value='';
+  renderChatMsgs();
+  // Auto-reply after 1 second
+  setTimeout(function(){
+    var t2 = new Date().toLocaleTimeString('ar-LB',{hour:'2-digit',minute:'2-digit'});
+    chatMsgs.push({from:'baladieh',text:'شكراً لتواصلك مع بلدية وادي الست. سيقوم أحد موظفينا بالرد عليك في أقرب وقت ممكن خلال أوقات الدوام الرسمي (8:00 - 16:00).', time:t2});
+    renderChatMsgs();
+  }, 1200);
+}
+).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function openHelp(page){
+  var content = '<div style="margin-bottom:16px"><h3 style="color:#1a6eb5;margin:0 0 8px;font-size:15px">👥 بوابة المواطن — بلدية وادي الست</h3><p style="font-size:13px;color:#444;line-height:1.7">هذه الصفحة تتيح لك تقديم طلباتك ومتابعتها بدون الحاجة لأي حساب.</p></div>'+
+    '<div style="margin-bottom:14px"><h4 style="color:#0f4d82;font-size:14px;border-right:3px solid #1a6eb5;padding-right:8px;margin:0 0 6px">📋 تقديم طلب جديد</h4>'+
+    '<ul style="padding-right:18px;font-size:13px;color:#555;line-height:1.8"><li>أدخل اسمك الكامل ورقم هاتفك</li><li>اختر نوع الطلب — ستظهر المستندات المطلوبة تلقائياً</li><li>اكتب وصفاً واضحاً لطلبك</li><li>يمكنك إرفاق صور أو ملفات</li><li>بعد الإرسال يصلك رقم مرجعي — احتفظ به</li></ul></div>'+
+    '<div style="margin-bottom:14px"><h4 style="color:#0f4d82;font-size:14px;border-right:3px solid #1a6eb5;padding-right:8px;margin:0 0 6px">🔍 متابعة طلب</h4>'+
+    '<ul style="padding-right:18px;font-size:13px;color:#555;line-height:1.8"><li>أدخل رقم الطلب المرجعي</li><li>سيُطلب منك رقم هاتفك للتحقق</li><li>ستظهر حالة طلبك وكل التحديثات</li></ul></div>'+
+    '<div style="margin-bottom:14px"><h4 style="color:#0f4d82;font-size:14px;border-right:3px solid #1a6eb5;padding-right:8px;margin:0 0 6px">📂 أنواع الطلبات</h4>'+
+    '<ul style="padding-right:18px;font-size:13px;color:#555;line-height:1.8">'+
+    '<li>⚠️ <b>شكوى</b>: مشاكل الخدمات والبنية التحتية (3-5 أيام)</li>'+
+    '<li>🤝 <b>رعاية اجتماعية</b>: طلبات الدعم والمساعدة (5-7 أيام)</li>'+
+    '<li>🏗️ <b>ترخيص</b>: رخص البناء والأعمال (7-14 يوم)</li>'+
+    '<li>❓ <b>استفسار</b>: أسئلة عامة (1-2 يوم)</li>'+
+    '<li>📜 <b>إفادة عقارية</b>: وثائق الملكية (5-10 أيام)</li>'+
+    '<li>💧 <b>شكوى ري</b>: مشاكل مياه الري (2-4 أيام)</li>'+
+    '</ul></div>'+
+    '<div style="margin-bottom:14px"><h4 style="color:#0f4d82;font-size:14px;border-right:3px solid #1a6eb5;padding-right:8px;margin:0 0 6px">💬 المحادثة مع البلدية</h4>'+
+    '<p style="font-size:13px;color:#555">يمكنك التواصل مباشرة مع البلدية عبر زر المحادثة. أوقات الرد: 8:00 — 16:00 (أيام العمل).</p></div>'+
+    '<div style="background:#f0f7ff;border:1px solid #bee3f8;border-radius:8px;padding:10px 12px;font-size:13px"><b style="color:#1a6eb5">📞 للمساعدة:</b> تواصل مع مكتب بلدية وادي الست مباشرة</div>';
+  var modal=document.getElementById('help-modal');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='help-modal';
+    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl';
+    modal.innerHTML='<div style="background:#fff;border-radius:20px;max-width:560px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)"><div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;border-radius:20px 20px 0 0;z-index:1"><div style="font-size:16px;font-weight:800;color:#1a6eb5">📖 دليل بوابة المواطن</div><button onclick="document.getElementById('help-modal').remove()" style="background:#f0f4f8;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">✕</button></div><div id="help-body-cit" style="padding:20px"></div></div>';
+    modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
+    document.body.appendChild(modal);
+  }
+  document.getElementById('help-body-cit').innerHTML=content;
+  modal.style.display='flex';
+}
+
+
+// ── HELP ──────────────────────────────────────────────────────────────────────
+function openHelp(page){
+  var content='<div style="margin-bottom:14px"><h3 style="color:#1a6eb5;margin:0 0 8px;font-size:15px">👥 بوابة المواطن — بلدية وادي الست</h3><p style="font-size:13px;color:#444;line-height:1.7">تقديم الطلبات ومتابعتها بدون حساب.</p></div>'+
+  '<div style="margin-bottom:12px"><h4 style="color:#0f4d82;font-size:14px;border-right:3px solid #1a6eb5;padding-right:8px;margin:0 0 6px">📋 تقديم طلب جديد</h4><ul style="padding-right:18px;font-size:13px;color:#555;line-height:1.8"><li>اسمك الكامل + رقم الهاتف إلزاميان</li><li>اختر النوع — ستظهر المستندات المطلوبة</li><li>احتفظ بالرقم المرجعي للمتابعة</li></ul></div>'+
+  '<div style="margin-bottom:12px"><h4 style="color:#0f4d82;font-size:14px;border-right:3px solid #1a6eb5;padding-right:8px;margin:0 0 6px">🔍 متابعة طلب</h4><ul style="padding-right:18px;font-size:13px;color:#555;line-height:1.8"><li>أدخل رقم الطلب + رقم هاتفك للتحقق</li></ul></div>'+
+  '<div style="margin-bottom:12px"><h4 style="color:#0f4d82;font-size:14px;border-right:3px solid #1a6eb5;padding-right:8px;margin:0 0 6px">📂 أنواع الطلبات</h4><ul style="padding-right:18px;font-size:13px;color:#555;line-height:1.8"><li>⚠️ شكوى: 3-5 أيام</li><li>🤝 رعاية: 5-7 أيام</li><li>🏗️ ترخيص: 7-14 يوم</li><li>❓ استفسار: 1-2 يوم</li><li>📜 إفادة عقارية: 5-10 أيام</li><li>💧 شكوى ري: 2-4 أيام</li></ul></div>';
+  var modal=document.getElementById('help-modal-cit');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='help-modal-cit';
+    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl';
+    modal.innerHTML='<div style="background:#fff;border-radius:20px;max-width:540px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)"><div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;border-radius:20px 20px 0 0;z-index:1"><div style="font-size:16px;font-weight:800;color:#1a6eb5">📖 دليل بوابة المواطن</div><button onclick="document.getElementById('help-modal-cit').remove()" style="background:#f0f4f8;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px">✕</button></div><div style="padding:20px" id="help-body-cit"></div></div>';
+    modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
+    document.body.appendChild(modal);
+  }
+  document.getElementById('help-body-cit').innerHTML=content;
+  modal.style.display='flex';
+}
+
+
+
+function openHelp(page){
+  var c='<div style="margin-bottom:14px"><h3 style="color:#1a6eb5;margin:0 0 8px;font-size:15px">👥 بوابة المواطن</h3><p style="font-size:13px;color:#444;line-height:1.7">تقديم الطلبات ومتابعتها.</p></div>'+
+  '<div style="margin-bottom:12px"><h4 style="color:#0f4d82;font-size:14px;border-right:3px solid #1a6eb5;padding-right:8px;margin:0 0 6px">📋 تقديم طلب</h4><ul style="padding-right:18px;font-size:13px;color:#555;line-height:1.8"><li>اسمك + هاتفك إلزاميان</li><li>اختر النوع — تظهر المستندات تلقائياً</li><li>احتفظ بالرقم المرجعي</li></ul></div>'+
+  '<div style="margin-bottom:12px"><h4 style="color:#0f4d82;font-size:14px;border-right:3px solid #1a6eb5;padding-right:8px;margin:0 0 6px">🔍 متابعة طلب</h4><ul style="padding-right:18px;font-size:13px;color:#555;line-height:1.8"><li>أدخل رقم الطلب + هاتفك للتحقق</li></ul></div>'+
+  '<div style="margin-bottom:12px"><h4 style="color:#0f4d82;font-size:14px;border-right:3px solid #1a6eb5;padding-right:8px;margin:0 0 6px">📂 أنواع الطلبات</h4><ul style="padding-right:18px;font-size:13px;color:#555;line-height:1.8"><li>⚠️ شكوى (3-5 أيام)</li><li>🤝 رعاية (5-7 أيام)</li><li>🏗️ ترخيص (7-14 يوم)</li><li>❓ استفسار (1-2 يوم)</li><li>📜 إفادة عقارية (5-10 أيام)</li><li>💧 شكوى ري (2-4 أيام)</li></ul></div>';
+  var m=document.getElementById('hm-cit');
+  if(!m){m=document.createElement('div');m.id='hm-cit';m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl';
+  m.innerHTML='<div style="background:#fff;border-radius:20px;max-width:540px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)"><div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;border-radius:20px 20px 0 0;z-index:1"><div style="font-size:16px;font-weight:800;color:#1a6eb5">📖 دليل بوابة المواطن</div><button onclick="document.getElementById('hm-cit').remove()" style="background:#f0f4f8;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px">✕</button></div><div style="padding:20px" id="hb-cit"></div></div>';
+  m.addEventListener('click',function(e){if(e.target===m)m.remove();});document.body.appendChild(m);}
+  document.getElementById('hb-cit').innerHTML=c;m.style.display='flex';
+}
+
 </script>
 </body>
 </html>
