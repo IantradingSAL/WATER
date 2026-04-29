@@ -56,6 +56,11 @@ a{color:inherit;text-decoration:none;}
 .hd-iconbtn:hover,.hd-iconbtn:active{background:rgba(255,255,255,.24);}
 .hd-iconbtn .dot{position:absolute;top:6px;left:6px;width:9px;height:9px;background:var(--sun);border-radius:50%;border:2px solid var(--blue2);display:none;}
 .hd-iconbtn.has-pending .dot{display:block;animation:pulse 2s infinite;}
+.hd-back{width:auto!important;border-radius:var(--r-full);padding:0 12px 0 14px;gap:6px;text-decoration:none;color:#fff;background:rgba(255,255,255,.18)!important;}
+.hd-back:hover,.hd-back:active{background:rgba(255,255,255,.28)!important;}
+.hd-back-i{font-size:16px;}
+.hd-back-l{font-size:12.5px;font-weight:700;}
+@media(max-width:679px){.hd-back{padding:0 11px;}.hd-back-l{display:none;}}
 @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.2);}}
 
 /* ═══════════ SEARCH BAR ═══════════ */
@@ -75,7 +80,7 @@ a{color:inherit;text-decoration:none;}
 .sb-filter-btn .ct{position:absolute;top:-3px;left:-3px;background:var(--sun);color:#3a2502;font-size:10px;font-weight:800;padding:1px 5px;border-radius:var(--r-full);min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;}
 
 /* ═══════════ STATS — horizontal scroll ═══════════ */
-.stats{max-width:1280px;margin:11px auto 0;padding:0 14px;display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.stats{display:none;max-width:1280px;margin:11px auto 0;padding:0 14px;grid-template-columns:repeat(2,1fr);gap:8px;}
 .stat{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow-sm);}
 .stat-i{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
 .stat-1 .stat-i{background:var(--blue3);color:var(--blue2);}
@@ -367,7 +372,39 @@ textarea.fm-i{resize:vertical;min-height:80px;}
 .spin{width:18px;height:18px;border:2.5px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-/* ═══════════ DESKTOP ENHANCEMENTS ═══════════ */
+/* Help button in header — distinct sun/yellow pill so it stands out */
+.hd-help{width:auto!important;border-radius:var(--r-full);padding:0 14px 0 12px;gap:6px;background:var(--sun)!important;color:#3a2502!important;border:1.5px solid var(--sun2);box-shadow:0 2px 8px rgba(245,166,35,.4);}
+.hd-help:hover,.hd-help:active{background:var(--sun2)!important;color:#fff!important;}
+.hd-help-i{font-size:16px;line-height:1;}
+.hd-help-l{font-size:12.5px;font-weight:800;white-space:nowrap;}
+@media(max-width:679px){
+  .hd-help{padding:0 11px;}
+  .hd-help-l{font-size:11.5px;}
+}
+/* Very small screens: hide the long label, keep the icon */
+@media(max-width:430px){
+  .hd-help-l{display:none;}
+}
+
+/* Help modal styling */
+.help-step{display:flex;gap:13px;padding:14px;background:var(--surface2);border-radius:var(--r);margin-bottom:10px;border:1px solid var(--border);}
+.help-step-i{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;background:#fff;border:1px solid var(--border);}
+.help-step.blue .help-step-i{background:var(--blue3);}
+.help-step.green .help-step-i{background:var(--green3);}
+.help-step.sun .help-step-i{background:var(--sun3);}
+.help-step.purple .help-step-i{background:#ede8f8;}
+.help-step.danger .help-step-i{background:var(--danger-bg);}
+.help-step-text{flex:1;}
+.help-step-t{font-size:14.5px;font-weight:800;color:var(--text);margin-bottom:5px;}
+.help-step.blue .help-step-t{color:var(--blue2);}
+.help-step.green .help-step-t{color:var(--green2);}
+.help-step.sun .help-step-t{color:var(--sun2);}
+.help-step.purple .help-step-t{color:#4a2178;}
+.help-step.danger .help-step-t{color:var(--danger);}
+.help-step-d{font-size:12.5px;color:var(--text2);line-height:1.7;}
+.help-step-d strong{color:var(--text);font-weight:700;}
+.help-divider{display:flex;align-items:center;gap:8px;margin:18px 0 10px;font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;}
+.help-divider::before,.help-divider::after{content:"";flex:1;height:1px;background:var(--border);}
 @media(min-width:680px){
   .hd-inner{padding:14px 20px;gap:14px;}
   .hd-logo{height:50px;width:50px;}
@@ -377,7 +414,7 @@ textarea.fm-i{resize:vertical;min-height:80px;}
   .hd-iconbtn{width:44px;height:44px;font-size:18px;}
   .sbar{top:78px;}
   .sbar-inner{padding:14px 20px;}
-  .stats{padding:0 20px;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px;}
+  .stats{display:grid;padding:0 20px;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px;}
   .stat{padding:14px 16px;}
   .stat-v{font-size:22px;}
   .stat-l{font-size:12px;}
@@ -429,10 +466,17 @@ textarea.fm-i{resize:vertical;min-height:80px;}
       <div class="hd-sub">دليل البلدة — أرقام، عائلات، مهن، وخدمات</div>
     </div>
     <div class="hd-actions">
+      <a class="hd-iconbtn hd-back" href="https://iantradingsal.github.io/wadi-el-sit-main-gate/" title="العودة لبوابة الخدمات الإلكترونية" aria-label="العودة">
+        <span class="hd-back-i">🏛️</span>
+        <span class="hd-back-l">البوابة</span>
+      </a>
+      <button class="hd-iconbtn hd-help" onclick="openHelp()" title="دليل الاستخدام والمساعدة" aria-label="المساعدة">
+        <span class="hd-help-i">❓</span>
+        <span class="hd-help-l">دليل الاستخدام والمساعدة</span>
+      </button>
       <button class="hd-iconbtn desktop-only" onclick="openAdd()" title="إضافة جهة اتصال" aria-label="إضافة">➕</button>
       <button class="hd-iconbtn desktop-only" id="HD_ADM" onclick="openAdmin()" title="لوحة الإدارة" aria-label="الإدارة">🛡️<span class="dot"></span></button>
       <button class="hd-iconbtn desktop-only" onclick="window.print()" title="طباعة" aria-label="طباعة">🖨️</button>
-      <button class="hd-iconbtn" onclick="openAbout()" title="حول" aria-label="حول">ℹ️</button>
     </div>
   </div>
 </header>
@@ -468,8 +512,12 @@ textarea.fm-i{resize:vertical;min-height:80px;}
   <div class="grid" id="GRD"></div>
   <div id="EMP" class="empty" style="display:none">
     <div class="empty-icon">🔍</div>
-    <div class="empty-t">لا توجد نتائج</div>
-    <div class="empty-s">جرّب كلمات بحث مختلفة، أو امسح الفلاتر</div>
+    <div class="empty-t">لم نجد ما تبحث عنه</div>
+    <div class="empty-s">جرّب كلمات أخرى، أو امسح الفلاتر، أو…</div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap">
+      <button class="btn btn-grn btn-sm" onclick="openAdd()">➕ أضف جهة جديدة</button>
+      <button class="btn btn-out btn-sm" onclick="openHelp()">❓ كيف يعمل الدليل؟</button>
+    </div>
   </div>
   <div class="pg" id="PG"></div>
 </div>
@@ -492,6 +540,14 @@ textarea.fm-i{resize:vertical;min-height:80px;}
     <div class="drw-section">
       <div class="drw-section-t">👨‍👩‍👧 العائلة</div>
       <div class="drw-fams" id="DRW_FAM"></div>
+    </div>
+    <div class="drw-section">
+      <div class="drw-section-t">📍 الموقع / الحي</div>
+      <div class="drw-fams" id="DRW_LOC"></div>
+    </div>
+    <div class="drw-section">
+      <div class="drw-section-t">💼 الوظيفة</div>
+      <div class="drw-fams" id="DRW_OCC"></div>
     </div>
     <div class="drw-section">
       <div class="drw-section-t">⚙️ خيارات</div>
@@ -594,9 +650,23 @@ MY_PENDING = lsGet('my_pending', []);
 // ═══════════════════════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════════════════════
-let qF = '', famF = '', letterF = '', occF = false, imgF = false, addedF = false;
+let qF = '', famF = '', letterF = '', occF = false, imgF = false, addedF = false, locF = '', occNameF = '';
 let pgN = 1;
 const PER_PAGE = 24;
+
+// Extract neighborhood/area from a free-text address (first chunk before separator)
+function extractArea(addr){
+  if(!addr) return '';
+  let s = addr.toString().trim();
+  // Common separators in Lebanese addresses
+  const seps = ['—','–','-',',','،','/'];
+  for(const sep of seps){
+    const idx = s.indexOf(sep);
+    if(idx > 0 && idx < 60){ s = s.slice(0, idx).trim(); break; }
+  }
+  // Strip leading "حي " / "حارة " for cleaner grouping
+  return s.replace(/^(حي|حارة|منطقة|محلة)\s+/,'').trim();
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // HELPERS
@@ -868,6 +938,8 @@ function getFiltered(){
     if(occF && !c.occupation) return false;
     if(imgF && !c.image) return false;
     if(addedF && c._src !== 'user_added') return false;
+    if(locF && extractArea(c.address) !== locF) return false;
+    if(occNameF && (c.occupation||'').trim() !== occNameF) return false;
     if(qF){
       const blob = buildSearchBlob(c);
       if(!matchesQuery(blob, qF)) return false;
@@ -889,13 +961,13 @@ function getFiltered(){
 function renderStats(){
   const all = getAllPublic();
   const total = all.length;
-  const families = new Set(all.map(c=>c.family).filter(x=>x)).size;
+  const distinctOccs = new Set(all.map(c=>(c.occupation||'').trim()).filter(x=>x)).size;
   const withOcc  = all.filter(c=>c.occupation).length;
   const withImg  = all.filter(c=>c.image).length;
   document.getElementById('STS').innerHTML = `
     <div class="stat stat-1"><div class="stat-i">📞</div><div><div class="stat-v">${total}</div><div class="stat-l">جهة اتصال</div></div></div>
-    <div class="stat stat-2"><div class="stat-i">👨‍👩‍👧</div><div><div class="stat-v">${families}</div><div class="stat-l">عائلة</div></div></div>
-    <div class="stat stat-3"><div class="stat-i">💼</div><div><div class="stat-v">${withOcc}</div><div class="stat-l">مع المهنة</div></div></div>
+    <div class="stat stat-2" style="cursor:pointer" onclick="openDrawer()" title="انقر للفلترة حسب الوظيفة"><div class="stat-i">💼</div><div><div class="stat-v">${distinctOccs}</div><div class="stat-l">وظيفة مختلفة</div></div></div>
+    <div class="stat stat-3"><div class="stat-i">✅</div><div><div class="stat-v">${withOcc}</div><div class="stat-l">مع المهنة</div></div></div>
     <div class="stat stat-4"><div class="stat-i">📷</div><div><div class="stat-v">${withImg}</div><div class="stat-l">مع صورة</div></div></div>
   `;
 }
@@ -915,16 +987,36 @@ function renderLettersBar(){
 
 function renderFiltersBar(){
   const all = getAllPublic();
-  const fams = {};
-  all.forEach(c => { if(c.family) fams[c.family] = (fams[c.family]||0) + 1; });
-  const sorted = Object.entries(fams).sort((a,b)=>b[1]-a[1]);
+  const fams = {}, locs = {}, occs = {};
+  all.forEach(c => {
+    if(c.family) fams[c.family] = (fams[c.family]||0) + 1;
+    const area = extractArea(c.address);
+    if(area) locs[area] = (locs[area]||0) + 1;
+    const occN = (c.occupation||'').trim();
+    if(occN) occs[occN] = (occs[occN]||0) + 1;
+  });
+  const sortedFams = Object.entries(fams).sort((a,b)=>b[1]-a[1]);
+  const sortedLocs = Object.entries(locs).sort((a,b)=>b[1]-a[1]);
+  const sortedOccs = Object.entries(occs).sort((a,b)=>b[1]-a[1]);
 
-  // Desktop
+  // Desktop top bar
   const dHtml = [`<select class="fm-i" style="padding:7px 28px 7px 12px;width:auto;font-size:13px;border-radius:999px" onchange="setFamily(this.value)">
     <option value="">جميع العائلات</option>
-    ${sorted.map(([f,n])=>`<option value="${escHtml(f)}" ${famF===f?'selected':''}>${escHtml(f)} (${n})</option>`).join('')}
+    ${sortedFams.map(([f,n])=>`<option value="${escHtml(f)}" ${famF===f?'selected':''}>${escHtml(f)} (${n})</option>`).join('')}
   </select>`];
-  sorted.slice(0,4).forEach(([f,n]) => {
+  // Location filter — always shown
+  dHtml.push(`<select class="fm-i" style="padding:7px 28px 7px 12px;width:auto;font-size:13px;border-radius:999px" onchange="setLocation(this.value)">
+    <option value="">📍 جميع المواقع${sortedLocs.length?` (${sortedLocs.length})`:''}</option>
+    ${sortedLocs.length===0 ? '<option value="" disabled>— لا توجد مواقع مسجّلة بعد —</option>' :
+      sortedLocs.map(([l,n])=>`<option value="${escHtml(l)}" ${locF===l?'selected':''}>${escHtml(l)} (${n})</option>`).join('')}
+  </select>`);
+  // Occupation filter — always shown next to location
+  dHtml.push(`<select class="fm-i" style="padding:7px 28px 7px 12px;width:auto;font-size:13px;border-radius:999px" onchange="setOccupation(this.value)">
+    <option value="">💼 جميع الوظائف${sortedOccs.length?` (${sortedOccs.length})`:''}</option>
+    ${sortedOccs.length===0 ? '<option value="" disabled>— لا توجد وظائف مسجّلة بعد —</option>' :
+      sortedOccs.map(([o,n])=>`<option value="${escHtml(o)}" ${occNameF===o?'selected':''}>${escHtml(o)} (${n})</option>`).join('')}
+  </select>`);
+  sortedFams.slice(0,3).forEach(([f,n]) => {
     dHtml.push(`<button class="drw-fam ${famF===f?'on':''}" onclick="setFamily('${escHtml(f).replace(/'/g,"\\'")}')">${escHtml(f)} <span class="ct">${n}</span></button>`);
   });
   dHtml.push(`<button class="drw-toggle sun ${occF?'on':''}" onclick="toggleOcc()">💼 مع مهنة</button>`);
@@ -932,12 +1024,40 @@ function renderFiltersBar(){
   dHtml.push(`<button class="drw-toggle ${addedF?'on':''}" onclick="toggleAdded()">➕ مُضافة</button>`);
   document.getElementById('FLT_D').innerHTML = dHtml.join('');
 
-  // Drawer families
-  const drwFamHtml = [`<button class="drw-fam ${!famF?'on':''}" onclick="setFamily('')">جميع العائلات</button>`];
-  sorted.forEach(([f,n]) => {
+  // Drawer family chips
+  const drwFamHtml = [`<button class="drw-fam ${!famF?'on':''}" onclick="setFamily('')">الكل</button>`];
+  sortedFams.forEach(([f,n]) => {
     drwFamHtml.push(`<button class="drw-fam ${famF===f?'on':''}" onclick="setFamily('${escHtml(f).replace(/'/g,"\\'")}')">${escHtml(f)} <span class="ct">${n}</span></button>`);
   });
   document.getElementById('DRW_FAM').innerHTML = drwFamHtml.join('');
+
+  // Drawer location chips
+  const drwLocEl = document.getElementById('DRW_LOC');
+  if(drwLocEl){
+    if(sortedLocs.length === 0){
+      drwLocEl.innerHTML = `<div style="font-size:12px;color:var(--text3);padding:6px">لا توجد مواقع مسجّلة بعد</div>`;
+    } else {
+      const drwLocHtml = [`<button class="drw-fam ${!locF?'on':''}" onclick="setLocation('')">الكل</button>`];
+      sortedLocs.forEach(([l,n]) => {
+        drwLocHtml.push(`<button class="drw-fam ${locF===l?'on':''}" onclick="setLocation('${escHtml(l).replace(/'/g,"\\'")}')">📍 ${escHtml(l)} <span class="ct">${n}</span></button>`);
+      });
+      drwLocEl.innerHTML = drwLocHtml.join('');
+    }
+  }
+
+  // Drawer occupation chips
+  const drwOccEl = document.getElementById('DRW_OCC');
+  if(drwOccEl){
+    if(sortedOccs.length === 0){
+      drwOccEl.innerHTML = `<div style="font-size:12px;color:var(--text3);padding:6px">لا توجد وظائف مسجّلة بعد</div>`;
+    } else {
+      const drwOccHtml = [`<button class="drw-fam ${!occNameF?'on':''}" onclick="setOccupation('')">الكل</button>`];
+      sortedOccs.forEach(([o,n]) => {
+        drwOccHtml.push(`<button class="drw-fam ${occNameF===o?'on':''}" onclick="setOccupation('${escHtml(o).replace(/'/g,"\\'")}')">💼 ${escHtml(o)} <span class="ct">${n}</span></button>`);
+      });
+      drwOccEl.innerHTML = drwOccHtml.join('');
+    }
+  }
 
   // Drawer toggles
   const drwTgHtml = [];
@@ -947,7 +1067,7 @@ function renderFiltersBar(){
   document.getElementById('DRW_TG').innerHTML = drwTgHtml.join('');
 
   // Active filter count badge
-  const count = [letterF, famF, occF?'1':'', imgF?'1':'', addedF?'1':''].filter(x=>x).length;
+  const count = [letterF, famF, locF, occNameF, occF?'1':'', imgF?'1':'', addedF?'1':''].filter(x=>x).length;
   const fb = document.getElementById('FB');
   const fbCt = document.getElementById('FB_CT');
   if(count > 0){ fb.classList.add('has-active'); fbCt.style.display='flex'; fbCt.textContent = count; }
@@ -1048,11 +1168,13 @@ function renderPg(total){
 function goPage(n){ pgN = n; renderGrid(); window.scrollTo({top:0,behavior:'smooth'}); }
 function setLetter(l){ letterF = l; pgN = 1; renderLettersBar(); renderFiltersBar(); renderGrid(); }
 function setFamily(f){ famF = f; pgN = 1; renderFiltersBar(); renderGrid(); }
+function setLocation(v){ locF = v; pgN = 1; renderFiltersBar(); renderGrid(); }
+function setOccupation(v){ occNameF = v; pgN = 1; renderFiltersBar(); renderGrid(); }
 function toggleOcc(){ occF = !occF; pgN = 1; renderFiltersBar(); renderGrid(); }
 function toggleImg(){ imgF = !imgF; pgN = 1; renderFiltersBar(); renderGrid(); }
 function toggleAdded(){ addedF = !addedF; pgN = 1; renderFiltersBar(); renderGrid(); }
 function clearAll(){
-  qF=''; famF=''; letterF=''; occF=false; imgF=false; addedF=false; pgN=1;
+  qF=''; famF=''; letterF=''; occF=false; imgF=false; addedF=false; locF=''; occNameF=''; pgN=1;
   document.getElementById('Q').value = '';
   document.getElementById('QC').classList.remove('show');
   renderLettersBar(); renderFiltersBar(); renderGrid();
@@ -1073,6 +1195,71 @@ document.getElementById('Q').addEventListener('input', e => {
   document.getElementById('QC').classList.toggle('show', !!qF);
   renderGrid();
 });
+
+// === Comprehensive list of professions for the strict dropdown ===
+const PROFESSIONS = {
+  'مهن طبية وصحية':[
+    'طبيب','طبيب أسنان','طبيب بيطري','صيدلي','ممرّض/ة','قابلة قانونية',
+    'مختبر طبي','أخصائي تغذية','معالج طبيعي','معالج نفسي','مساعد طبيب'
+  ],
+  'هندسة ومعلوماتية':[
+    'مهندس مدني','مهندس كهرباء','مهندس ميكانيك','مهندس معلوماتية','مهندس زراعي',
+    'مهندس ديكور','مهندس معماري','مبرمج','مطوّر برمجيات','فنّي صيانة'
+  ],
+  'تعليم وأكاديميا':[
+    'مدرّس ابتدائي','مدرّس ثانوي','أستاذ جامعي','مدير مدرسة','مرشد تربوي',
+    'مدرّس روضة','مفتّش تربوي','باحث','مكتبي'
+  ],
+  'حقوق وإدارة':[
+    'محامي','قاضٍ','كاتب عدل','محاسب','مدقّق حسابات','مستشار قانوني',
+    'مدير عام','موارد بشرية','إداري','محلل مالي','استشاري'
+  ],
+  'حِرف ومهن يدوية':[
+    'نجّار','حدّاد','سبّاك','كهربائي','ميكانيكي','دهّان','بنّاء','لحّام',
+    'عامل بلاط','مكيّفات','خرّاطة','صيانة عامة','حفر آبار'
+  ],
+  'تجارة وخدمات':[
+    'تاجر','صاحب محل','صاحب مطعم','مقاول','بائع','صانع تجاري',
+    'حلّاق/ة','خيّاط/ة','طبّاخ','نادل','خبّاز','جزّار','صائغ ذهب',
+    'متعهّد طعام','مصوّر فوتوغرافي','تأمين','عقارات'
+  ],
+  'نقل وقيادة':[
+    'سائق خاص','سائق تكسي','سائق شاحنة','سائق فان مدرسة','نقل عام'
+  ],
+  'زراعة وحيوان':[
+    'مزارع','مربّي مواشٍ','مربّي دواجن','مربّي نحل','راعي','بستاني','مهندس زراعي'
+  ],
+  'قطاع عام وأمني':[
+    'موظف بلدية','موظف حكومي','موظف بنك','عسكري','شرطي','درك','جمارك','إطفائي',
+    'حرس وطني','أمن داخلي','ضابط'
+  ],
+  'إعلام وفنون':[
+    'صحفي','مذيع','مصوّر','محرّر','مترجم','فنّان تشكيلي','موسيقي','مغنّي',
+    'ممثّل','مصمّم غرافيك','مصمّم أزياء','مصمّم داخلي','كاتب','شاعر'
+  ],
+  'دين':[
+    'خوري/كاهن','مطران','راهب','شيخ','مفتي','إمام','مرتّل'
+  ],
+  'حالات أخرى':[
+    'موظف','أعمال حرّة','مدير','استشاري','رئيس عمل','شريك في عمل',
+    'ربّة منزل','طالب/ة','متقاعد','لا يعمل','عاطل عن العمل','أخرى'
+  ]
+};
+function professionOptionsHtml(selected){
+  let html = '<option value="">— اختر المهنة —</option>';
+  for(const [grp, items] of Object.entries(PROFESSIONS)){
+    html += `<optgroup label="${grp}">`;
+    items.forEach(p => { html += `<option value="${escHtml(p)}" ${selected===p?'selected':''}>${escHtml(p)}</option>`; });
+    html += '</optgroup>';
+  }
+  return html;
+}
+function familyOptionsHtml(selected){
+  const fams = Array.from(new Set(getAllPublic().map(c=>c.family).filter(x=>x))).sort((a,b)=>a.localeCompare(b,'ar'));
+  let html = '<option value="">— اختر العائلة —</option>';
+  fams.forEach(f => { html += `<option value="${escHtml(f)}" ${selected===f?'selected':''}>${escHtml(f)}</option>`; });
+  return html;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // MODAL HELPERS
@@ -1354,7 +1541,7 @@ function openEdit(c){
           </div>
           <div>
             <label class="fm-l">العائلة</label>
-            <input class="fm-i" id="ED_FAM" value="${escHtml(c.family||'')}">
+            <select class="fm-i" id="ED_FAM"></select>
           </div>
         </div>
         <div class="fm-grp">
@@ -1384,7 +1571,7 @@ function openEdit(c){
         <div class="fm-section-t">معلومات العمل</div>
         <div class="fm-grp">
           <label class="fm-l">المهنة</label>
-          <input class="fm-i" id="ED_OCC" value="${escHtml(c.occupation||'')}" list="OCC_LIST">
+          <select class="fm-i" id="ED_OCC"></select>
         </div>
         <div class="fm-grp">
           <label class="fm-l">☎️ هاتف العمل</label>
@@ -1403,7 +1590,6 @@ function openEdit(c){
         </div>
 
         <datalist id="OCC_LIST">
-          <option value="مهندس"><option value="طبيب"><option value="مدرّس"><option value="محامي"><option value="نجار"><option value="حداد"><option value="كهربائي"><option value="سبّاك"><option value="حلاق"><option value="خيّاط"><option value="تاجر"><option value="مزارع"><option value="سائق"><option value="موظف"><option value="ربة منزل"><option value="طالب"><option value="متقاعد">
         </datalist>
 
         <div class="fm-grp">
@@ -1429,6 +1615,22 @@ function openEdit(c){
     </div>
   </div>`;
   openModal(html);
+  // Populate strict dropdowns with current values pre-selected
+  const famSel = document.getElementById('ED_FAM');
+  famSel.innerHTML = familyOptionsHtml(c.family || '');
+  // If current family isn't in known list (e.g. legacy entry), prepend it as a custom option
+  if(c.family && !Array.from(famSel.options).some(o => o.value === c.family)){
+    const opt = document.createElement('option');
+    opt.value = c.family; opt.textContent = c.family + ' (الحالي)'; opt.selected = true;
+    famSel.insertBefore(opt, famSel.firstChild.nextSibling);
+  }
+  const occSel = document.getElementById('ED_OCC');
+  occSel.innerHTML = professionOptionsHtml(c.occupation || '');
+  if(c.occupation && !Array.from(occSel.options).some(o => o.value === c.occupation)){
+    const opt = document.createElement('option');
+    opt.value = c.occupation; opt.textContent = c.occupation + ' (الحالي)'; opt.selected = true;
+    occSel.insertBefore(opt, occSel.firstChild.nextSibling);
+  }
 }
 
 async function submitEdit(e, c){
@@ -1610,7 +1812,11 @@ function openAdd(){
 
         <div class="fm-grp row2">
           <div><label class="fm-l">الاسم الأول <span class="req">*</span></label><input class="fm-i" id="AD_FIRST" required placeholder="مثال: ميشال"></div>
-          <div><label class="fm-l">العائلة <span class="req">*</span></label><input class="fm-i" id="AD_FAM" required placeholder="مثال: مقصود" list="FAMS_LIST"><datalist id="FAMS_LIST"></datalist></div>
+          <div>
+            <label class="fm-l">العائلة <span class="req">*</span></label>
+            <select class="fm-i" id="AD_FAM" required></select>
+            <div class="fm-help">إذا كانت عائلتك غير موجودة، تواصل مع البلدية لإضافتها.</div>
+          </div>
         </div>
         <div class="fm-grp">
           <label class="fm-l">الاسم الكامل <span class="opt">(يُملأ تلقائياً)</span></label>
@@ -1639,7 +1845,7 @@ function openAdd(){
         <div class="fm-section-t">معلومات العمل</div>
         <div class="fm-grp">
           <label class="fm-l">المهنة <span class="opt">(اختياري)</span></label>
-          <input class="fm-i" id="AD_OCC" placeholder="مثال: مهندس، طبيب" list="OCC_LIST">
+          <select class="fm-i" id="AD_OCC"></select>
         </div>
         <div class="fm-grp">
           <label class="fm-l">☎️ هاتف العمل <span class="opt">(اختياري)</span></label>
@@ -1656,10 +1862,6 @@ function openAdd(){
             <button type="button" class="fm-loc-btn" onclick="useMyLocation('AD_WLL',event)">📍 موقعي</button>
           </div>
         </div>
-
-        <datalist id="OCC_LIST">
-          <option value="مهندس"><option value="طبيب"><option value="مدرّس"><option value="محامي"><option value="نجار"><option value="حداد"><option value="كهربائي"><option value="سبّاك"><option value="حلاق"><option value="خيّاط"><option value="تاجر"><option value="مزارع"><option value="سائق"><option value="موظف"><option value="ربة منزل"><option value="طالب"><option value="متقاعد">
-        </datalist>
 
         <div class="fm-grp">
           <label class="fm-l">ملاحظات إضافية <span class="opt">(اختياري)</span></label>
@@ -1679,8 +1881,9 @@ function openAdd(){
   </div>`;
   openModal(html);
 
-  const fams = Array.from(new Set(getAllPublic().map(c=>c.family).filter(x=>x))).sort();
-  document.getElementById('FAMS_LIST').innerHTML = fams.map(f=>`<option value="${escHtml(f)}">`).join('');
+  // Populate family + occupation strict dropdowns
+  document.getElementById('AD_FAM').innerHTML = familyOptionsHtml('');
+  document.getElementById('AD_OCC').innerHTML = professionOptionsHtml('');
 
   const updateFull = () => {
     const f = document.getElementById('AD_FIRST').value.trim();
@@ -1689,7 +1892,7 @@ function openAdd(){
     if(!fullEl.dataset.touched && f && fa) fullEl.value = `${f} ${fa}`;
   };
   document.getElementById('AD_FIRST').addEventListener('input', updateFull);
-  document.getElementById('AD_FAM').addEventListener('input', updateFull);
+  document.getElementById('AD_FAM').addEventListener('change', updateFull);
   document.getElementById('AD_FULL').addEventListener('input', e => e.target.dataset.touched = '1');
 }
 
@@ -2140,62 +2343,201 @@ async function submitAdminEdit(e, c){
 
 
 // ═══════════════════════════════════════════════════════════════════════════
-// ABOUT MODAL
+// HELP / ABOUT / WHAT'S NEW — single rich modal
 // ═══════════════════════════════════════════════════════════════════════════
-function openAbout(){
+function openHelp(){ openInfoModal('help'); }
+function openAbout(){ openInfoModal('help'); }
+
+let _infoTab = 'help';
+function openInfoModal(tab){
+  _infoTab = tab || 'help';
+  renderInfoModal();
+}
+function setInfoTab(t){ _infoTab = t; renderInfoModal(); }
+
+function renderInfoModal(){
   const total = REGISTRY.length;
   const families = new Set(REGISTRY.map(c=>c.family).filter(x=>x)).size;
+  const muniWa = MUN_PHONE.replace(/[^\d]/g,'');
+
+  // Help body
+  const helpBody = `
+    <div class="fm-info" style="text-align:center;font-size:14px;line-height:1.7">
+      💡 <strong>دليل وادي الست هو ملك أهل البلدة.</strong><br>
+      مرحباً بك! إذا واجهت أيّ مشكلة أو احتجت تعديلاً، اتّبع الخطوات الواضحة أدناه. كلّ شيء مجاني وسهل.
+    </div>
+
+    <div class="help-divider">إذا كان رقمك غير مدرج في الدليل</div>
+    <div class="help-step green">
+      <div class="help-step-i">➕</div>
+      <div class="help-step-text">
+        <div class="help-step-t">أضف نفسك أو شخصاً تعرفه</div>
+        <div class="help-step-d">
+          ١. اضغط على زر <strong>➕ إضافة</strong> (في الشريط السفلي على الجوال، أو الأعلى على الكمبيوتر).<br>
+          ٢. املأ الاسم والرقم والمعلومات الاختيارية (مهنة، عنوان، صورة، موقع GPS).<br>
+          ٣. اضغط <strong>إرسال للمراجعة</strong>.<br>
+          ٤. ستراها فوراً مع شارة <strong>"قيد المراجعة"</strong>، ولن تظهر للزوّار الآخرين قبل موافقة البلدية (عادةً خلال ٢٤–٤٨ ساعة).
+        </div>
+      </div>
+    </div>
+
+    <div class="help-divider">إذا كانت معلوماتك خاطئة أو ناقصة</div>
+    <div class="help-step sun">
+      <div class="help-step-i">✏️</div>
+      <div class="help-step-text">
+        <div class="help-step-t">طلب تعديل (يحتاج موافقة)</div>
+        <div class="help-step-d">
+          ١. ابحث عن اسمك في الدليل.<br>
+          ٢. اضغط على بطاقتك ثم <strong>✏️ تعديل</strong>.<br>
+          ٣. صحّح ما تريد (الاسم، الرقم، العنوان، المهنة، إلخ) وأضف اسمك ورقمك للتحقق.<br>
+          ٤. سيُرسَل التعديل للبلدية للمراجعة. <strong>المعلومات الأصلية لا تتغيّر</strong> حتى الموافقة.
+        </div>
+      </div>
+    </div>
+    <div class="help-step blue">
+      <div class="help-step-i">📝</div>
+      <div class="help-step-text">
+        <div class="help-step-t">طلب تصحيح بسيط (لخطأ صغير)</div>
+        <div class="help-step-d">
+          داخل بطاقتك، اضغط <strong>طلب تصحيح</strong> واكتب التصحيح بإيجاز. خَيار أسرع للأخطاء البسيطة (حرف، رقم).
+        </div>
+      </div>
+    </div>
+
+    <div class="help-divider">إذا أردت إخفاء معلوماتك (إزالة جزئية)</div>
+    <div class="help-step purple">
+      <div class="help-step-i">🔒</div>
+      <div class="help-step-text">
+        <div class="help-step-t">اطلب من البلدية إخفاء ما تريد</div>
+        <div class="help-step-d">
+          البلدية تستطيع — بناءً على طلبك — إخفاء:<br>
+          • <strong>رقم هاتفك</strong> فقط (يبقى اسمك ظاهراً)<br>
+          • <strong>عنوانك وموقعك</strong> فقط<br>
+          • السماح فقط بـ<strong>الاتصال</strong> دون واتساب، أو العكس<br>
+          راسل البلدية عبر واتساب على <a href="https://wa.me/${muniWa}" target="_blank" rel="noopener" style="color:var(--blue);font-weight:700">${fmtPhone(MUN_PHONE)}</a> مع طلبك.
+        </div>
+      </div>
+    </div>
+
+    <div class="help-divider">إذا أردت إزالة جهتك بالكامل</div>
+    <div class="help-step danger">
+      <div class="help-step-i">🚫</div>
+      <div class="help-step-text">
+        <div class="help-step-t">إزالة كاملة من الدليل العام</div>
+        <div class="help-step-d">
+          راسل البلدية مباشرةً — هاتفياً أو عبر واتساب — مع <strong>اسمك الكامل</strong> و<strong>رقم هاتفك المسجَّل</strong> للتحقق. بعد التحقق، تُخفى جهتك تماماً عن الدليل خلال يوم عمل.<br>
+          📞 <a href="tel:${MUN_PHONE}" style="color:var(--blue);font-weight:700">${fmtPhone(MUN_PHONE)}</a> &nbsp; • &nbsp; ✉️ <a href="mailto:${MUN_EMAIL}" style="color:var(--blue);font-weight:700">${MUN_EMAIL}</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="help-divider">سرّية وخصوصية</div>
+    <div style="background:var(--blue3);padding:13px;border-radius:var(--r);font-size:12.5px;color:var(--blue2);line-height:1.7">
+      🛡️ <strong>التزامنا:</strong> لا نشارك أرقامكم مع جهات إعلانية، ولا نستخدمها لأغراض تجارية. الدليل لخدمة أهل البلدة فقط. أيّ طلب إخفاء يُحترَم خلال ٢٤–٤٨ ساعة.
+    </div>
+  `;
+
+  // What's New body
+  const whatsNewBody = `
+    <div class="fm-info" style="margin-bottom:14px"><strong>الإصدار 2.0 — جديد!</strong> ميزات الدليل المُضافة حديثاً.</div>
+    <div class="help-step blue">
+      <div class="help-step-i">🌐</div>
+      <div class="help-step-text">
+        <div class="help-step-t">بحث متعدّد اللغات</div>
+        <div class="help-step-d">ابحث بالعربية أو الإنكليزية أو الفرنسية. مثلاً: "Michel" يجد "ميشال"، و"Joseph" يجد "يوسف"، و"Maksoud" يجد "مقصود".</div>
+      </div>
+    </div>
+    <div class="help-step sun">
+      <div class="help-step-i">📒</div>
+      <div class="help-step-text">
+        <div class="help-step-t">واجهة محسّنة للجوال</div>
+        <div class="help-step-d">شريط تنقّل سفلي، بطاقات أكبر، أزرار سهلة للمس. كلّ شيء بمتناول إصبعك.</div>
+      </div>
+    </div>
+    <div class="help-step green">
+      <div class="help-step-i">📍</div>
+      <div class="help-step-text">
+        <div class="help-step-t">فلاتر جديدة</div>
+        <div class="help-step-d">صفّ الجهات حسب <strong>الموقع/الحي</strong> أو <strong>الوظيفة</strong> أو <strong>العائلة</strong>.</div>
+      </div>
+    </div>
+    <div class="help-step purple">
+      <div class="help-step-i">💼</div>
+      <div class="help-step-text">
+        <div class="help-step-t">معلومات العمل المنفصلة</div>
+        <div class="help-step-d">هاتف وعنوان وموقع للعمل بجانب المعلومات الشخصية — مع أزرار اتصال وخريطة منفصلة.</div>
+      </div>
+    </div>
+    <div class="help-step purple">
+      <div class="help-step-i">🛡️</div>
+      <div class="help-step-text">
+        <div class="help-step-t">أدوات إدارة ظهور دقيقة</div>
+        <div class="help-step-d">إخفاء الرقم فقط، أو العنوان فقط، أو السماح فقط بالاتصال أو فقط بالواتساب — حسب طلب صاحب الرقم.</div>
+      </div>
+    </div>
+    <div class="help-step blue">
+      <div class="help-step-i">✏️</div>
+      <div class="help-step-text">
+        <div class="help-step-t">نظام التعديل بالموافقة</div>
+        <div class="help-step-d">أيّ زائر يمكنه طلب تعديل، لكن لا شيء يتغيّر قبل موافقة البلدية. حماية كاملة للبيانات.</div>
+      </div>
+    </div>
+  `;
+
+  // About body
+  const aboutBody = `
+    <div style="text-align:center;padding:14px 0">
+      <div style="width:84px;height:84px;border-radius:50%;background:#fff;padding:6px;margin:0 auto 14px;box-shadow:var(--shadow);border:2px solid var(--blue-soft)">
+        <img src="${LOGO_B64}" style="width:100%;height:100%;object-fit:contain">
+      </div>
+      <h3 style="font-size:18px;color:var(--blue2);margin-bottom:5px">📒 دليل وادي الست</h3>
+      <p style="font-size:13px;color:var(--text2)">دليل البلدة الرسمي — Yellow Pages</p>
+    </div>
+    <div class="dt-fields">
+      <div class="dt-field">
+        <div class="dt-field-i">📊</div>
+        <div class="dt-field-text"><div class="dt-field-l">الإحصائيات</div><div class="dt-field-v rtl">${total} جهة اتصال • ${families} عائلة</div></div>
+      </div>
+      <div class="dt-field">
+        <div class="dt-field-i">📞</div>
+        <div class="dt-field-text"><div class="dt-field-l">للتواصل مع البلدية</div><div class="dt-field-v">${fmtPhone(MUN_PHONE)}</div></div>
+        <a class="dt-field-btn" href="tel:${MUN_PHONE}">📞</a>
+      </div>
+      <div class="dt-field">
+        <div class="dt-field-i">💬</div>
+        <div class="dt-field-text"><div class="dt-field-l">واتساب البلدية</div><div class="dt-field-v">${fmtPhone(MUN_PHONE)}</div></div>
+        <a class="dt-field-btn" href="https://wa.me/${muniWa}" target="_blank" rel="noopener">💬</a>
+      </div>
+      <div class="dt-field">
+        <div class="dt-field-i">✉️</div>
+        <div class="dt-field-text"><div class="dt-field-l">البريد الإلكتروني</div><div class="dt-field-v">${MUN_EMAIL}</div></div>
+        <a class="dt-field-btn" href="mailto:${MUN_EMAIL}">✉️</a>
+      </div>
+    </div>
+    <div style="font-size:11px;text-align:center;color:var(--text3);margin-top:18px">
+      إصدار 2.0 — ${new Date().getFullYear()} © بلدية وادي الست<br>
+      مدعوم من IanTrading SAL
+    </div>
+  `;
+
+  const body = _infoTab === 'whatsnew' ? whatsNewBody : (_infoTab === 'about' ? aboutBody : helpBody);
+
   const html = `<div class="modal" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
     <div class="modal-hd">
-      <div class="modal-hd-content"><div class="modal-t">حول الدليل</div><div class="modal-s">دليل بلدية وادي الست</div></div>
+      <div class="modal-hd-content">
+        <div class="modal-t">${_infoTab==='help'?'❓ دليل الاستخدام والمساعدة':_infoTab==='whatsnew'?'✨ ما الجديد':'ℹ️ حول الدليل'}</div>
+        <div class="modal-s">${_infoTab==='help'?'كيف تضيف، تُعدّل، أو تُزيل معلوماتك':_infoTab==='whatsnew'?'الميزات المُضافة حديثاً':'دليل بلدية وادي الست'}</div>
+      </div>
       <button class="modal-x" onclick="closeModal()" aria-label="إغلاق">✕</button>
     </div>
-    <div class="modal-bd">
-      <div style="text-align:center;padding:14px 0">
-        <div style="width:84px;height:84px;border-radius:50%;background:#fff;padding:6px;margin:0 auto 14px;box-shadow:var(--shadow);border:2px solid var(--blue-soft)">
-          <img src="${LOGO_B64}" style="width:100%;height:100%;object-fit:contain">
-        </div>
-        <h3 style="font-size:18px;color:var(--blue2);margin-bottom:5px">📒 دليل وادي الست</h3>
-        <p style="font-size:13px;color:var(--text2)">دليل البلدة الرسمي — Yellow Pages</p>
+    <div class="modal-bd" style="padding:0">
+      <div class="adm-tabs">
+        <button class="adm-tab ${_infoTab==='help'?'on':''}" onclick="setInfoTab('help')">❓ مساعدة</button>
+        <button class="adm-tab ${_infoTab==='whatsnew'?'on':''}" onclick="setInfoTab('whatsnew')">✨ ما الجديد</button>
+        <button class="adm-tab ${_infoTab==='about'?'on':''}" onclick="setInfoTab('about')">ℹ️ حول</button>
       </div>
-
-      <div class="dt-fields">
-        <div class="dt-field">
-          <div class="dt-field-i">📊</div>
-          <div class="dt-field-text">
-            <div class="dt-field-l">الإحصائيات</div>
-            <div class="dt-field-v rtl">${total} جهة اتصال • ${families} عائلة</div>
-          </div>
-        </div>
-        <div class="dt-field">
-          <div class="dt-field-i">📞</div>
-          <div class="dt-field-text">
-            <div class="dt-field-l">للتواصل مع البلدية</div>
-            <div class="dt-field-v">${fmtPhone(MUN_PHONE)}</div>
-          </div>
-          <a class="dt-field-btn" href="tel:${MUN_PHONE}">📞</a>
-        </div>
-        <div class="dt-field">
-          <div class="dt-field-i">✉️</div>
-          <div class="dt-field-text">
-            <div class="dt-field-l">البريد الإلكتروني</div>
-            <div class="dt-field-v">${MUN_EMAIL}</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="fm-info" style="margin-top:14px">
-        💡 <strong>كيف يعمل الدليل؟</strong><br>
-        • يمكنك البحث برقم الهاتف، الاسم، العائلة، أو المهنة.<br>
-        • أي شخص يمكنه إضافة جهة اتصال جديدة أو طلب تعديل.<br>
-        • جميع الإضافات والتعديلات تخضع لمراجعة البلدية قبل النشر.<br>
-        • لا تظهر أي معلومة جديدة في الدليل العام إلا بعد الموافقة.
-      </div>
-
-      <div style="font-size:11px;text-align:center;color:var(--text3);margin-top:18px">
-        إصدار 2.0 — ${new Date().getFullYear()} © بلدية وادي الست
-      </div>
+      <div style="padding:16px">${body}</div>
     </div>
   </div>`;
   openModal(html);
