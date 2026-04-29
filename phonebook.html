@@ -146,6 +146,9 @@ a{color:inherit;text-decoration:none;}
 .cb-new{background:var(--green);color:#fff;box-shadow:0 2px 8px rgba(45,122,62,.4);}
 .cb-pending{background:var(--warn);color:#fff;}
 .cb-edit-pending{background:var(--sun);color:#3a2502;box-shadow:0 2px 6px rgba(245,166,35,.4);}
+.cb-hidden{background:#6b7280;color:#fff;box-shadow:0 2px 6px rgba(107,114,128,.4);}
+.card.is-hidden{opacity:.62;background:repeating-linear-gradient(45deg,#fff,#fff 8px,#f5f5f5 8px,#f5f5f5 16px);}
+.card.is-hidden::before{background:linear-gradient(90deg,#6b7280,#374151);opacity:1;}
 
 /* ═══════════ PAGINATION ═══════════ */
 .pg{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:18px;flex-wrap:wrap;}
@@ -245,6 +248,15 @@ a{color:inherit;text-decoration:none;}
 .adm-toggle .sw::after{content:"";position:absolute;top:3px;right:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:right .2s var(--t2);box-shadow:0 1px 3px rgba(0,0,0,.2);}
 .adm-toggle.on .sw{background:var(--green);}
 .adm-toggle.on .sw::after{right:21px;}
+
+/* admin radio group */
+.adm-radio-group{margin:9px 0;background:#fff;border-radius:var(--r);padding:11px;border:1px solid var(--border);}
+.adm-radio-t{font-size:12.5px;font-weight:700;color:var(--text2);margin-bottom:8px;}
+.adm-radio-opts{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.adm-radio{display:flex;align-items:center;gap:6px;padding:9px 10px;background:var(--surface2);border-radius:9px;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--text2);border:1.5px solid transparent;transition:all .15s var(--t1);}
+.adm-radio input{display:none;}
+.adm-radio:hover{background:var(--blue3);}
+.adm-radio.on{background:var(--blue);color:#fff;border-color:var(--blue2);}
 
 /* ═══════════ BUTTONS ═══════════ */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:13px 18px;border-radius:var(--r);font-size:14px;font-weight:700;transition:all .15s var(--t1);text-decoration:none;border:1px solid transparent;cursor:pointer;min-height:46px;}
@@ -817,6 +829,9 @@ function getEnriched(c){
     work_lng: ex.work_lng ?? null,
     phone_hidden: !!ex.phone_hidden,
     address_hidden: !!ex.address_hidden,
+    entry_hidden: !!ex.entry_hidden,
+    disable_call: !!ex.disable_call,
+    disable_wa: !!ex.disable_wa,
     _src: 'registry'
   };
 }
@@ -826,7 +841,12 @@ function getAllPublic(){
   const added = ADDED.filter(a=>a.status==='approved').map(c=>({...c, _src:'user_added'}));
   // Show user's own pending entries (so they see them after submit)
   const myPend = MY_PENDING.filter(p => !ADDED.some(a => a.id === p.id)).map(c=>({...c, _src:'user_added', _myPending:true}));
-  return [...reg, ...added, ...myPend];
+  let all = [...reg, ...added, ...myPend];
+  // Non-admin viewers: hide entries that are flagged entry_hidden (unless it's their own pending)
+  if(!isAdmin){
+    all = all.filter(c => !c.entry_hidden || c._myPending);
+  }
+  return all;
 }
 
 function hasPendingEditFor(c){
@@ -941,13 +961,15 @@ function renderCard(c){
     ? `<div class="av"><img src="${escHtml(c.image)}" alt=""></div>`
     : `<div class="av ${cls}">${escHtml(init)}</div>`;
   const phoneOk = !!c.phone && !c.phone_hidden;
-  const waOk = phoneOk && c.cc === 'lb';
-  const mapOk = (c.lat && c.lng) && !c.address_hidden;
+  const callOk  = phoneOk && !c.disable_call;
+  const waOk    = phoneOk && c.cc === 'lb' && !c.disable_wa;
+  const mapOk   = (c.lat && c.lng) && !c.address_hidden;
   const occHtml = c.occupation ? `<div class="card-occ">${escHtml(c.occupation)}</div>` : '';
   const addrHtml = (c.address && !c.address_hidden) ? `<div class="card-addr">${escHtml(c.address)}</div>` : '';
 
   let badgeHtml = '';
-  if(c._myPending) badgeHtml = '<span class="card-badge cb-pending">قيد المراجعة</span>';
+  if(c.entry_hidden) badgeHtml = '<span class="card-badge cb-hidden">🚫 مخفية</span>';
+  else if(c._myPending) badgeHtml = '<span class="card-badge cb-pending">قيد المراجعة</span>';
   else if(c._src === 'user_added') badgeHtml = '<span class="card-badge cb-new">جديد</span>';
   else if(hasPendingEditFor(c)) badgeHtml = '<span class="card-badge cb-edit-pending">تعديل معلّق</span>';
 
@@ -955,7 +977,7 @@ function renderCard(c){
     ? `<div class="card-phone-hidden">الرقم مخفي بطلب صاحبه</div>`
     : (c.phone ? `<div class="card-phone">${fmtPhone(c.phone)}</div>` : '');
 
-  return `<div class="card ${c.image?'has-img':''} ${c._src==='user_added'?'user-added':''}">
+  return `<div class="card ${c.image?'has-img':''} ${c._src==='user_added'?'user-added':''} ${c.entry_hidden?'is-hidden':''}">
     ${badgeHtml}
     <div class="card-row" onclick='openDetail(${JSON.stringify(c).replace(/'/g,"&apos;")})'>
       ${av}
@@ -968,7 +990,7 @@ function renderCard(c){
     ${phoneBlock}
     ${addrHtml}
     <div class="card-actions">
-      <a class="qa qa-tel ${phoneOk?'':'dis'}" href="${phoneOk?`tel:${c.phone}`:'#'}" aria-label="اتصال"><span class="qa-i">📞</span><span class="qa-l">اتصال</span></a>
+      <a class="qa qa-tel ${callOk?'':'dis'}" href="${callOk?`tel:${c.phone}`:'#'}" aria-label="اتصال"><span class="qa-i">📞</span><span class="qa-l">اتصال</span></a>
       <a class="qa qa-wa ${waOk?'':'dis'}" href="${waOk?`https://wa.me/${c.wa}`:'#'}" target="_blank" rel="noopener" aria-label="واتساب"><span class="qa-i">💬</span><span class="qa-l">واتساب</span></a>
       <a class="qa qa-map ${mapOk?'':'dis'}" href="${mapOk?`https://www.google.com/maps?q=${c.lat},${c.lng}`:'#'}" target="_blank" rel="noopener" aria-label="الموقع"><span class="qa-i">📍</span><span class="qa-l">الموقع</span></a>
       <button class="qa qa-edit" onclick='event.stopPropagation();openEdit(${JSON.stringify(c).replace(/'/g,"&apos;")})' aria-label="تعديل"><span class="qa-i">✏️</span><span class="qa-l">تعديل</span></button>
@@ -1083,9 +1105,16 @@ function openDetail(c){
     ? `<div class="dt-av"><img src="${escHtml(c.image)}" alt=""></div>`
     : `<div class="dt-av ${cls}">${escHtml(init)}</div>`;
   const phoneOk = !!c.phone && !c.phone_hidden;
-  const waOk = phoneOk && c.cc === 'lb';
-  const mapOk = (c.lat && c.lng) && !c.address_hidden;
+  const callOk  = phoneOk && !c.disable_call;
+  const waOk    = phoneOk && c.cc === 'lb' && !c.disable_wa;
+  const mapOk   = (c.lat && c.lng) && !c.address_hidden;
   const workMapOk = c.work_lat && c.work_lng;
+
+  // Determine current phone-mode for the radio group
+  let phoneMode = 'both';
+  if(c.phone_hidden) phoneMode = 'hidden';
+  else if(c.disable_call && !c.disable_wa) phoneMode = 'wa_only';
+  else if(c.disable_wa && !c.disable_call) phoneMode = 'call_only';
 
   const mapHtml = mapOk ? `<div class="dt-map">
     <iframe loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=${c.lng-0.005},${c.lat-0.003},${c.lng+0.005},${c.lat+0.003}&layer=mapnik&marker=${c.lat},${c.lng}"></iframe>
@@ -1107,30 +1136,57 @@ function openDetail(c){
   if(c.work_phone) workFields.push({i:'☎️', l:'هاتف العمل', v:fmtPhone(c.work_phone), copy:c.work_phone});
   if(c.work_address) workFields.push({i:'🏢', l:'عنوان العمل', v:c.work_address, rtl:true});
 
-  // Admin tools
+  // Admin tools — granular visibility controls
   let admHtml = '';
   if(isAdmin){
     admHtml = `<div class="adm-tools">
-      <div class="adm-tools-t">أدوات الإدارة</div>
-      <div class="adm-toggle ${c.phone_hidden?'on':''}" onclick="toggleHide('${c._src}','${c.id}','phone_hidden',this)">
+      <div class="adm-tools-t">أدوات إدارة الظهور</div>
+
+      <div class="adm-toggle ${c.entry_hidden?'on':''}" onclick="toggleHide('${c._src}','${c.id}','entry_hidden',this)">
         <div>
-          <div class="adm-toggle-l">🔒 إخفاء رقم الهاتف</div>
-          <div class="adm-toggle-l-s">عند طلب صاحب الرقم. الاسم يبقى ظاهراً.</div>
+          <div class="adm-toggle-l">🚫 إخفاء الجهة بالكامل</div>
+          <div class="adm-toggle-l-s">لن يراها الزوّار العاديون نهائياً</div>
         </div>
         <div class="sw"></div>
       </div>
+
+      <div class="adm-radio-group">
+        <div class="adm-radio-t">📞 إعدادات الهاتف</div>
+        <div class="adm-radio-opts">
+          <label class="adm-radio ${phoneMode==='both'?'on':''}">
+            <input type="radio" name="pm_${c.id}" value="both" ${phoneMode==='both'?'checked':''} onchange="setPhoneMode('${c._src}','${c.id}','both')">
+            <span>📞 + 💬 كلاهما</span>
+          </label>
+          <label class="adm-radio ${phoneMode==='call_only'?'on':''}">
+            <input type="radio" name="pm_${c.id}" value="call_only" ${phoneMode==='call_only'?'checked':''} onchange="setPhoneMode('${c._src}','${c.id}','call_only')">
+            <span>📞 اتصال فقط</span>
+          </label>
+          <label class="adm-radio ${phoneMode==='wa_only'?'on':''}">
+            <input type="radio" name="pm_${c.id}" value="wa_only" ${phoneMode==='wa_only'?'checked':''} onchange="setPhoneMode('${c._src}','${c.id}','wa_only')">
+            <span>💬 واتساب فقط</span>
+          </label>
+          <label class="adm-radio ${phoneMode==='hidden'?'on':''}">
+            <input type="radio" name="pm_${c.id}" value="hidden" ${phoneMode==='hidden'?'checked':''} onchange="setPhoneMode('${c._src}','${c.id}','hidden')">
+            <span>🔒 إخفاء الرقم</span>
+          </label>
+        </div>
+      </div>
+
       <div class="adm-toggle ${c.address_hidden?'on':''}" onclick="toggleHide('${c._src}','${c.id}','address_hidden',this)">
         <div>
-          <div class="adm-toggle-l">🔒 إخفاء العنوان</div>
-          <div class="adm-toggle-l-s">يبقى الموقع على الخريطة مخفياً أيضاً.</div>
+          <div class="adm-toggle-l">🔒 إخفاء العنوان والموقع</div>
+          <div class="adm-toggle-l-s">يخفي العنوان النصّي وزرّ الخريطة</div>
         </div>
         <div class="sw"></div>
       </div>
+
       <div style="display:flex;gap:7px;margin-top:9px">
         <button class="btn btn-purp btn-sm" style="flex:1" onclick='openAdminEdit(${JSON.stringify(c).replace(/'/g,"&apos;")})'>✏️ تعديل مباشر (إدمن)</button>
       </div>
     </div>`;
   }
+
+  const hiddenBanner = (c.entry_hidden && isAdmin) ? `<div class="fm-error" style="margin-bottom:13px">🚫 <strong>هذه الجهة مخفية حالياً عن العامة.</strong> فقط الإدمن يراها.</div>` : '';
 
   const html = `<div class="modal" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
@@ -1142,6 +1198,7 @@ function openDetail(c){
       <button class="modal-x" onclick="closeModal()" aria-label="إغلاق">✕</button>
     </div>
     <div class="modal-bd">
+      ${hiddenBanner}
       <div class="dt-hero">
         ${av}
         <div>
@@ -1152,7 +1209,7 @@ function openDetail(c){
       </div>
 
       <div class="dt-actions">
-        <a class="dt-action tel ${phoneOk?'':'dis'}" href="${phoneOk?`tel:${c.phone}`:'#'}"><span class="dt-action-i">📞</span>اتصال</a>
+        <a class="dt-action tel ${callOk?'':'dis'}" href="${callOk?`tel:${c.phone}`:'#'}"><span class="dt-action-i">📞</span>اتصال</a>
         <a class="dt-action wa ${waOk?'':'dis'}" href="${waOk?`https://wa.me/${c.wa}`:'#'}" target="_blank" rel="noopener"><span class="dt-action-i">💬</span>واتساب</a>
         <a class="dt-action map ${mapOk?'':'dis'}" href="${mapOk?`https://www.google.com/maps?q=${c.lat},${c.lng}`:'#'}" target="_blank" rel="noopener"><span class="dt-action-i">📍</span>خريطة</a>
         <button class="dt-action edit" onclick='closeModal();setTimeout(()=>openEdit(${JSON.stringify(c).replace(/'/g,"&apos;")}),200)'><span class="dt-action-i">✏️</span>تعديل</button>
@@ -1219,10 +1276,9 @@ async function toggleHide(srcType, contactId, field, btn){
   try {
     if(srcType === 'registry'){
       const refId = parseInt(contactId);
-      // upsert into phonebook_extras
       const existing = EXTRAS[refId] || {};
       const payload = { mun_id: MUN_ID, ref_id: refId, ...existing, [field]: willOn, status:'approved' };
-      delete payload.id; // let DB set it
+      delete payload.id;
       const { data, error } = await sb.from('phonebook_extras').upsert(payload, { onConflict: 'mun_id,ref_id' }).select().single();
       if(error) throw error;
       EXTRAS[refId] = { ...EXTRAS[refId], [field]: willOn };
@@ -1235,6 +1291,40 @@ async function toggleHide(srcType, contactId, field, btn){
     renderGrid(); renderStats();
   } catch(ex){
     btn.classList.toggle('on', !willOn);
+    console.error(ex);
+    toast('⚠️ تعذّر الحفظ', 'err');
+  }
+}
+
+// Set 3 phone-related flags together based on radio choice
+async function setPhoneMode(srcType, contactId, mode){
+  if(!isAdmin || !sb) return;
+  const flags = { phone_hidden:false, disable_call:false, disable_wa:false };
+  if(mode === 'hidden')   flags.phone_hidden = true;
+  if(mode === 'call_only') flags.disable_wa  = true;
+  if(mode === 'wa_only')   flags.disable_call = true;
+  // mode === 'both' → all false (defaults)
+  try {
+    if(srcType === 'registry'){
+      const refId = parseInt(contactId);
+      const existing = EXTRAS[refId] || {};
+      const payload = { mun_id: MUN_ID, ref_id: refId, ...existing, ...flags, status:'approved' };
+      delete payload.id;
+      const { error } = await sb.from('phonebook_extras').upsert(payload, { onConflict: 'mun_id,ref_id' });
+      if(error) throw error;
+      EXTRAS[refId] = { ...EXTRAS[refId], ...flags };
+    } else {
+      const { error } = await sb.from('phonebook_entries').update(flags).eq('id', contactId);
+      if(error) throw error;
+      ADDED = ADDED.map(a => a.id === contactId ? { ...a, ...flags } : a);
+    }
+    toast('✅ تم تطبيق الإعدادات', 'ok');
+    // Update UI labels in the radio group
+    document.querySelectorAll(`input[name="pm_${contactId}"]`).forEach(r => {
+      r.parentElement.classList.toggle('on', r.checked);
+    });
+    renderGrid(); renderStats();
+  } catch(ex){
     console.error(ex);
     toast('⚠️ تعذّر الحفظ', 'err');
   }
