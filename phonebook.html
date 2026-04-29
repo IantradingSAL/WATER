@@ -429,7 +429,7 @@ textarea.fm-i{resize:vertical;min-height:80px;}
     <div class="sb-row">
       <div class="sb-search">
         <span class="sb-icon">🔍</span>
-        <input type="search" id="Q" placeholder="ابحث بالاسم، العائلة، الرقم، المهنة..." autocomplete="off" inputmode="search">
+        <input type="search" id="Q" placeholder="ابحث: اسم • عائلة • رقم • مهنة (عربي / English / Français)" autocomplete="off" inputmode="search" dir="auto">
         <button class="sb-clear" id="QC" onclick="clearSearch()" aria-label="مسح">✕</button>
       </div>
       <button class="sb-filter-btn" id="FB" onclick="openDrawer()" aria-label="فلاتر">
@@ -592,6 +592,204 @@ const AR_FIRST_LETTERS = ['ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز'
 function normAr(s){
   return (s||'').toString().replace(/[إأآا]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[\u064B-\u0652]/g,'').toLowerCase().trim();
 }
+
+// === Latin transliteration (English / French / Alt) for cross-language search ===
+const LAT_MAPS = {
+  en:  {'ا':'a','أ':'a','إ':'i','آ':'aa','ب':'b','ت':'t','ث':'th','ج':'j','ح':'h','خ':'kh','د':'d','ذ':'z','ر':'r','ز':'z','س':'s','ش':'sh','ص':'s','ض':'d','ط':'t','ظ':'z','ع':'a','غ':'gh','ف':'f','ق':'q','ك':'k','ل':'l','م':'m','ن':'n','ه':'h','و':'w','ي':'y','ى':'a','ة':'a','ء':'','ؤ':'w','ئ':'y','ٱ':'a'},
+  fr:  {'ا':'a','أ':'a','إ':'i','آ':'a','ب':'b','ت':'t','ث':'s','ج':'j','ح':'h','خ':'kh','د':'d','ذ':'z','ر':'r','ز':'z','س':'s','ش':'ch','ص':'s','ض':'d','ط':'t','ظ':'z','ع':'a','غ':'gh','ف':'f','ق':'k','ك':'k','ل':'l','م':'m','ن':'n','ه':'h','و':'ou','ي':'i','ى':'a','ة':'e','ء':'','ؤ':'ou','ئ':'i','ٱ':'a'},
+  alt: {'ا':'a','أ':'a','إ':'a','آ':'a','ب':'b','ت':'t','ث':'t','ج':'j','ح':'h','خ':'h','د':'d','ذ':'d','ر':'r','ز':'z','س':'s','ش':'sh','ص':'s','ض':'d','ط':'t','ظ':'z','ع':'a','غ':'g','ف':'f','ق':'k','ك':'k','ل':'l','م':'m','ن':'n','ه':'h','و':'o','ي':'y','ى':'a','ة':'','ء':'','ؤ':'o','ئ':'y','ٱ':'a'}
+};
+function arToLat(s, mode){
+  if(!s) return '';
+  const m = LAT_MAPS[mode] || LAT_MAPS.en;
+  let out = '';
+  for(const ch of s.toString()){ out += m[ch] !== undefined ? m[ch] : ch; }
+  return out.toLowerCase().replace(/\s+/g,' ').trim();
+}
+// Lossy phonetic — drops vowels but keeps h/w, unifies sh/ch/q/k, collapses doubles
+function lossyAlpha(s){
+  return (s||'').toString().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/sh/g,'s').replace(/ch/g,'s').replace(/ph/g,'f').replace(/kh/g,'k').replace(/gh/g,'g').replace(/th/g,'t').replace(/q/g,'k')
+    .replace(/ou/g,'u').replace(/oo/g,'u').replace(/ee/g,'i').replace(/aw/g,'w')
+    .replace(/[aeiouy]/g,'')
+    .replace(/([a-z])\1+/g,'$1')
+    .replace(/[^a-z\s]/g,'')
+    .replace(/\s+/g,' ').trim();
+}
+function digitsOnly(s){ return (s||'').toString().replace(/\D/g,''); }
+
+// === Cultural / common-spelling aliases (Arabic word → Latin variants) ===
+// Catches mappings pure transliteration misses (Joseph↔Yousef, John↔Hanna, etc.)
+const NAME_ALIASES = {
+  'يوسف':['joseph','jose','youssef','yousef','yousif','yusuf','yossef','youssouf'],
+  'يوحنا':['john','jean','youhanna','jouhanna','hanna','hana'],
+  'حنا':['hanna','hana','hanno','hannah'],
+  'ميشال':['michel','michael','mishal','mishel','michal','mike'],
+  'ميشيل':['michel','michael','mishel','mishal'],
+  'انطوان':['antoine','antoun','anthony','antony','antone','tony','toni'],
+  'انطون':['antoun','antoine'],
+  'طوني':['tony','toni','antony','anthony'],
+  'جورج':['george','georges','georgio','jorge','geroge'],
+  'جرجس':['gerges','girgis','jirjis','jorge','george'],
+  'بطرس':['peter','boutros','butros','botros','petros','pierre'],
+  'بيار':['pierre','peter','piere','byar'],
+  'بيتر':['peter','pierre'],
+  'سمعان':['simon','semaan','simaan','simeon'],
+  'الياس':['elias','ilyas','elyas','iliass'],
+  'ايلي':['elie','eli','ely','elia'],
+  'جوزيف':['joseph','jozeph'],
+  'جوزف':['joseph','jozeph'],
+  'فادي':['fady','fadi','fadie','phadi'],
+  'مارون':['maroun','maron','maroon'],
+  'موريس':['maurice','morris','moris','mauris'],
+  'فؤاد':['fouad','fuad','foad','fwad','foud'],
+  'مارسيل':['marcel','marcell','marcelle'],
+  'كميل':['camille','kamil','kameel','camil'],
+  'فاروق':['farouk','faruk','farouq','farouk'],
+  'سامي':['sami','samy','samee'],
+  'كمال':['kamal','kemal','kamel'],
+  'حبيب':['habib','habeeb'],
+  'نديم':['nadim','nadeem'],
+  'كرم':['karam','keram','kerem'],
+  'رفيق':['rafik','rafiq','rafeek','rafic'],
+  'نجيب':['najib','najeeb','nageeb','najeb'],
+  'سليم':['salim','saleem','sleem','selim'],
+  'فريد':['farid','fareed','phared'],
+  'شربل':['charbel','sharbel','charbil','sharbel'],
+  'بشارة':['bechara','bichara','bashara','bcharra'],
+  'بشير':['bechir','bashir','beshir','bashar'],
+  'انور':['anwar','anouar','anouwar'],
+  'سامر':['samer','samir','sameer'],
+  'سمير':['samir','sameer','samer'],
+  'حسن':['hassan','hasan'],
+  'حسين':['hussein','hosein','hussain'],
+  'محمد':['mohammed','mohamed','muhammad','mhamad','mohamad'],
+  'احمد':['ahmad','ahmed'],
+  'علي':['ali','aly'],
+  'عمر':['omar','omer','umar'],
+  'كريم':['karim','kareem','keram'],
+  'وسام':['wissam','wisam','wessam','wessem'],
+  'هاني':['hany','hani','haney'],
+  'وليد':['walid','waleed','wlid'],
+  'زياد':['ziad','zeyad','ziyad'],
+  'باسم':['bassem','bassam','basem','basim'],
+  'باسل':['bassel','basil','bassil'],
+  'مازن':['mazen','mazin'],
+  'هشام':['hicham','hisham','heisham'],
+  'تيسير':['tayseer','taysir','teissir'],
+  'مروان':['marwan','merwan'],
+  'رامي':['rami','ramie','remi'],
+  'جاد':['jad','jaad','jade'],
+  'مالك':['malek','malik','maalek'],
+  'نواف':['nawaf','nouwaf'],
+  'رياض':['riad','riyad','riadh','reyad'],
+  // Female
+  'مريم':['maryam','mariam','maryem','miriam','mary','marie'],
+  'ماريا':['maria','marya','mariah'],
+  'سارة':['sara','sarah'],
+  'لينا':['lina','lena','leena'],
+  'رنا':['rana','ranna'],
+  'ندى':['nada','nadia'],
+  'ريما':['rima','reema','rema'],
+  'هلا':['hala','halla'],
+  'ميرا':['mira','meera'],
+  'كريستين':['christine','kristine','christina'],
+  'ريم':['reem','rim','reema'],
+  'فاطمة':['fatima','fatma','fatemeh'],
+  'ام':['oum','om','um','umm'],
+  'أبو':['abou','abu'], 'ابو':['abou','abu'], 'ابي':['abou','abu','abi','aby'],
+  // Family-name fragments
+  'مقصود':['maksoud','maqsoud','maksood','maxoud'],
+  'جوهر':['jouhar','jawhar','jowhar','johar','jouher'],
+  'شهوان':['chahwan','shahwan','shihwan','chehwan'],
+  'فرح':['farah','farrah','frah','ferah'],
+  'رزق':['rezk','rizk','rezek','rizq'],
+  'صليبا':['sleiba','sleeba','sliba','sleba','seliba'],
+  'الحاج':['el hajj','elhage','el hage','haj','hage'],
+};
+
+// Common occupations — Arabic ↔ English/French
+const OCC_ALIASES = {
+  'مهندس':['engineer','engineering','ingenieur'],
+  'طبيب':['doctor','dr','physician','medecin','médecin'],
+  'محامي':['lawyer','attorney','avocat'],
+  'مدرس':['teacher','prof','professor'],
+  'مدرسة':['teacher','prof'],
+  'استاذ':['teacher','professor','prof'],
+  'كهربائي':['electrician','electricien'],
+  'سباك':['plumber','plombier'],
+  'حداد':['blacksmith','smith','soudeur'],
+  'نجار':['carpenter','menuisier'],
+  'ميكانيكي':['mechanic','mecanicien'],
+  'تاجر':['merchant','trader','marchand','seller'],
+  'سائق':['driver','chauffeur'],
+  'ممرض':['nurse','infirmier'],
+  'ممرضة':['nurse'],
+  'صيدلي':['pharmacist','pharmacien'],
+  'صيدلية':['pharmacy','pharmacie'],
+  'محاسب':['accountant','comptable'],
+  'مزارع':['farmer','agriculteur'],
+  'حلاق':['barber','coiffeur','hairdresser'],
+  'خياط':['tailor','couturier'],
+  'موظف':['employee','employe','employé'],
+  'متقاعد':['retired','retraite'],
+  'طالب':['student','etudiant','étudiant'],
+  'ربة منزل':['housewife','femme au foyer'],
+  'كاهن':['priest','pretre','prêtre','father'],
+  'خوري':['priest','pretre'],
+  'مدير':['manager','director','directeur'],
+  'مهندس مدني':['civil engineer'],
+  'طبيب اسنان':['dentist','dentiste'],
+};
+
+function aliasesFor(arText){
+  const out = [];
+  if(!arText) return '';
+  for(const [ar, alts] of Object.entries(NAME_ALIASES)){
+    if(arText.includes(ar)) out.push(...alts);
+  }
+  for(const [ar, alts] of Object.entries(OCC_ALIASES)){
+    if(arText.includes(ar)) out.push(...alts);
+  }
+  return out.join(' ');
+}
+
+// Build a multi-form search blob for one contact
+function buildSearchBlob(c){
+  const arText = [c.name, c.first, c.family, c.father, c.mother, c.occupation, c.address, c.work_address, c.notes].filter(Boolean).join(' ');
+  const arN  = normAr(arText);
+  const en   = arToLat(arText,'en');
+  const fr   = arToLat(arText,'fr');
+  const alt  = arToLat(arText,'alt');
+  const aliases = aliasesFor(arText);
+  const allLat = (en+' '+fr+' '+alt+' '+aliases+' '+(c.email||'')).toLowerCase();
+  const loss = lossyAlpha(allLat);
+  const phones = [c.phone, c.work_phone, c.wa].filter(Boolean).map(digitsOnly).join(' ');
+  return arN + ' | ' + allLat + ' | ' + loss + ' | ' + phones;
+}
+
+// Try query in 4 forms: lowercase, Arabic-normalized, digits-only, lossy
+function matchesQuery(blob, q){
+  if(!q) return true;
+  const ql = q.toLowerCase().trim();
+  if(!ql) return true;
+  if(blob.includes(ql)) return true;
+  const qa = normAr(q);
+  if(qa && qa !== ql && blob.includes(qa)) return true;
+  const qd = digitsOnly(q);
+  if(qd && qd.length >= 3 && blob.includes(qd)) return true;
+  const qLossy = lossyAlpha(q);
+  if(qLossy){
+    if(qLossy.length >= 3 && blob.includes(qLossy)) return true;
+    // For 2-char lossy, require word boundary
+    if(qLossy.length === 2){
+      const re = new RegExp('(^|\\s)' + qLossy + '($|\\s)');
+      if(re.test(blob)) return true;
+    }
+  }
+  return false;
+}
 function firstLetter(name){ return normAr(name).charAt(0) || ''; }
 function avatarColor(s){ let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))|0; return 'av-'+(Math.abs(h)%8+1); }
 function initials(name){ const p=(name||'').trim().split(/\s+/); return p.length>=2?(p[0][0]||'')+(p[p.length-1][0]||''):(p[0]||'').slice(0,2); }
@@ -642,16 +840,15 @@ function hasPendingEditFor(c){
 // ═══════════════════════════════════════════════════════════════════════════
 function getFiltered(){
   const all = getAllPublic();
-  const qn = normAr(qF);
   return all.filter(c => {
     if(letterF && firstLetter(c.first || c.name) !== letterF) return false;
     if(famF && c.family !== famF) return false;
     if(occF && !c.occupation) return false;
     if(imgF && !c.image) return false;
     if(addedF && c._src !== 'user_added') return false;
-    if(qn){
-      const hay = normAr([c.name, c.first, c.family, c.father, c.phone, c.occupation, c.email, c.address, c.work_phone, c.work_address].join(' '));
-      if(!hay.includes(qn)) return false;
+    if(qF){
+      const blob = buildSearchBlob(c);
+      if(!matchesQuery(blob, qF)) return false;
     }
     return true;
   }).sort((a,b)=> {
