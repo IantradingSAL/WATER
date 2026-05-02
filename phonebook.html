@@ -377,6 +377,10 @@ textarea.fm-i{resize:vertical;min-height:80px;}
 .hd-help:hover,.hd-help:active{background:var(--sun2)!important;color:#fff!important;}
 .hd-help-i{font-size:16px;line-height:1;}
 .hd-help-l{font-size:12.5px;font-weight:800;white-space:nowrap;}
+.hd-help-new{position:absolute;top:-6px;left:-6px;background:var(--danger);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:var(--r-full);box-shadow:0 2px 6px rgba(191,36,36,.4);animation:newPulse 2s ease-in-out infinite;letter-spacing:.5px;}
+.hd-help-new.hidden{display:none;}
+@keyframes newPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
+.hd-help{position:relative;}
 @media(max-width:679px){
   .hd-help{padding:0 11px;}
   .hd-help-l{font-size:11.5px;}
@@ -470,9 +474,10 @@ textarea.fm-i{resize:vertical;min-height:80px;}
         <span class="hd-back-i">🏛️</span>
         <span class="hd-back-l">البوابة</span>
       </a>
-      <button class="hd-iconbtn hd-help" onclick="openHelp()" title="دليل الاستخدام والمساعدة" aria-label="المساعدة">
+      <button class="hd-iconbtn hd-help" onclick="markWhatsNewSeen();openInfoModal('whatsnew');" title="دليل الاستخدام والمساعدة" aria-label="المساعدة">
         <span class="hd-help-i">❓</span>
         <span class="hd-help-l">دليل الاستخدام والمساعدة</span>
+        <span class="hd-help-new" id="HD_HELP_NEW">جديد</span>
       </button>
       <button class="hd-iconbtn desktop-only" onclick="openAdd()" title="إضافة جهة اتصال" aria-label="إضافة">➕</button>
       <button class="hd-iconbtn desktop-only" id="HD_ADM" onclick="openAdmin()" title="لوحة الإدارة" aria-label="الإدارة">🛡️<span class="dot"></span></button>
@@ -2773,7 +2778,45 @@ function renderInfoModal(){
 
   // What's New body
   const whatsNewBody = `
-    <div class="fm-info" style="margin-bottom:14px"><strong>الإصدار 2.0 — جديد!</strong> ميزات الدليل المُضافة حديثاً.</div>
+    <div class="fm-info" style="margin-bottom:14px;background:linear-gradient(135deg,var(--green3),var(--blue3));border-left:4px solid var(--green2);">
+      <strong>🎉 الإصدار 2.1 — جديد جدّاً!</strong><br>
+      <span style="font-size:12px;opacity:.85">تحديث مايو 2026 — تحسينات على المشاركة وإضافة جهات الاتصال</span>
+    </div>
+
+    <div class="help-step green" style="border:2px solid var(--green);box-shadow:0 4px 14px rgba(45,122,62,.15)">
+      <div class="help-step-i" style="background:linear-gradient(135deg,#25D366,#128C7E);color:#fff">💬</div>
+      <div class="help-step-text">
+        <div class="help-step-t">⭐ مشاركة عبر واتساب برسالة جميلة</div>
+        <div class="help-step-d">
+          عند الضغط على <strong>🔗 مشاركة</strong> في بطاقة أيّ شخص، تُعدّ تلقائياً <strong>رسالة منسّقة احترافياً</strong> فيها كل التفاصيل:<br>
+          • الاسم الكامل والعائلة واسم الأب والأم<br>
+          • الهاتف الشخصي مع زرّ واتساب مباشر<br>
+          • العنوان <strong>ورابط الموقع على خرائط Google</strong> 📍<br>
+          • معلومات العمل (المهنة، هاتف، عنوان، وموقع منفصل)<br>
+          • نصوص عريضة تظهر بشكل جميل تلقائياً على واتساب<br>
+          مع <strong>أربعة خيارات للمشاركة:</strong> واتساب 💬، مشاركة عامّة 📤، نسخ 📋، أو بريد إلكتروني ✉️.
+        </div>
+      </div>
+    </div>
+
+    <div class="help-step blue">
+      <div class="help-step-i">✅</div>
+      <div class="help-step-text">
+        <div class="help-step-t">اسم الأب إلزامي عند الإضافة</div>
+        <div class="help-step-d">لتوحيد الأسماء في الدليل ومنع الاختلاط بين الأشخاص الذين يحملون نفس الاسم. الاسم الكامل يُبنى تلقائياً (الاسم + الأب + العائلة).</div>
+      </div>
+    </div>
+
+    <div class="help-step sun">
+      <div class="help-step-i">📍</div>
+      <div class="help-step-text">
+        <div class="help-step-t">مساعدة GPS محسّنة</div>
+        <div class="help-step-d">إذا تعذّر تحديد موقعك، تظهر نافذة شاملة بخطوات تفعيل GPS لـ iPhone و Android والكمبيوتر، مع حلول للمشاكل الشائعة (متصفّح داخل واتساب/فايسبوك، وضع الطاقة المنخفضة، إلخ).</div>
+      </div>
+    </div>
+
+    <div class="help-divider">الإصدار 2.0 — ميزات سابقة</div>
+
     <div class="help-step blue">
       <div class="help-step-i">🌐</div>
       <div class="help-step-text">
@@ -2789,9 +2832,9 @@ function renderInfoModal(){
       </div>
     </div>
     <div class="help-step green">
-      <div class="help-step-i">📍</div>
+      <div class="help-step-i">🔍</div>
       <div class="help-step-text">
-        <div class="help-step-t">فلاتر جديدة</div>
+        <div class="help-step-t">فلاتر متقدّمة</div>
         <div class="help-step-d">صفّ الجهات حسب <strong>الموقع/الحي</strong> أو <strong>الوظيفة</strong> أو <strong>العائلة</strong>.</div>
       </div>
     </div>
@@ -2849,7 +2892,7 @@ function renderInfoModal(){
       </div>
     </div>
     <div style="font-size:11px;text-align:center;color:var(--text3);margin-top:18px">
-      إصدار 2.0 — ${new Date().getFullYear()} © بلدية وادي الست<br>
+      إصدار 2.1 — ${new Date().getFullYear()} © بلدية وادي الست<br>
       مدعوم من IanTrading SAL
     </div>
   `;
@@ -2964,10 +3007,22 @@ async function init(){
   renderLettersBar();
   renderFiltersBar();
   renderGrid();
+  // Hide "NEW" badge on help button if user already saw v2.1
+  if(lsGet('whatsnew_seen','') === 'v2.1'){
+    const b = document.getElementById('HD_HELP_NEW');
+    if(b) b.classList.add('hidden');
+  }
   await checkSession();
   await loadFromServer();
 }
 
+function markWhatsNewSeen(){
+  lsSet('whatsnew_seen', 'v2.1');
+  const b = document.getElementById('HD_HELP_NEW');
+  if(b) b.classList.add('hidden');
+}
+
+// Keep openHelp available (defaults to "help" tab) but the header button goes to "whatsnew" first time
 init();
 </script>
 </body>
