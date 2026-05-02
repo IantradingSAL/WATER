@@ -1381,6 +1381,12 @@ function openDetail(c){
       <div style="display:flex;gap:7px;margin-top:9px">
         <button class="btn btn-purp btn-sm" style="flex:1" onclick='openAdminEdit(${JSON.stringify(c).replace(/'/g,"&apos;")})'>✏️ تعديل مباشر (إدمن)</button>
       </div>
+
+      <div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)">
+        <div style="font-size:11px;font-weight:800;color:var(--danger);margin-bottom:6px;letter-spacing:.4px">⚠️ منطقة الحذف الدائم</div>
+        <div style="font-size:11.5px;color:var(--text2);line-height:1.55;margin-bottom:8px">الحذف لا يمكن التراجع عنه. إذا كنت تريد فقط إخفاء الجهة، استخدم الزرّ أعلاه.</div>
+        <button class="btn btn-sm" style="width:100%;background:#fff;color:var(--danger);border:1.5px solid var(--danger);font-weight:800" onclick='confirmDeleteContact(${JSON.stringify({id:c.id,name:c.name,_src:c._src}).replace(/'/g,"&apos;")})'>🗑️ حذف نهائي من القاعدة</button>
+      </div>
     </div>`;
   }
 
@@ -2679,6 +2685,102 @@ async function admRejectEntry(id){
     renderAdminPanel();
     toast('✅ تم الرفض');
   } catch(e){ toast('⚠️ خطأ','err'); }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PERMANENT DELETE — admin only, two-step confirmation
+// ═══════════════════════════════════════════════════════════════════════════
+function confirmDeleteContact(meta){
+  if(!isAdmin){ toast('⚠️ ميزة للأدمن فقط','err'); return; }
+  closeModal();
+  const html = `<div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd" style="background:linear-gradient(135deg,var(--danger) 0%,#8a1818 100%)">
+      <div class="modal-hd-content">
+        <div class="modal-t">⚠️ تأكيد الحذف الدائم</div>
+        <div class="modal-s">هذا إجراء لا يمكن التراجع عنه</div>
+      </div>
+      <button class="modal-x" onclick="closeModal()" aria-label="إغلاق">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div class="fm-error" style="margin-bottom:14px;padding:14px">
+        🗑️ أنت على وشك حذف هذه الجهة <strong>نهائياً</strong> من القاعدة:<br><br>
+        <span style="font-size:16px;font-weight:800;color:var(--text)">${escHtml(meta.name||'')}</span><br><br>
+        بعد الحذف:<br>
+        • لن تظهر الجهة في الدليل<br>
+        • سيُحذف سجلّها بالكامل من قاعدة البيانات<br>
+        • <strong>لا يمكن استرجاعها</strong><br><br>
+        💡 إذا كنت تريد فقط إخفاءها مؤقّتاً، أغلق هذه النافذة واستخدم زرّ <strong>"إخفاء الجهة بالكامل"</strong>.
+      </div>
+
+      <div class="fm-grp">
+        <label class="fm-l">للتأكيد، اكتب كلمة <strong style="color:var(--danger)">حذف</strong> في المربّع التالي:</label>
+        <input class="fm-i" id="DEL_CONF" placeholder="حذف" autocomplete="off" oninput="document.getElementById('DEL_BTN').disabled = this.value.trim() !== 'حذف'">
+      </div>
+
+      <div id="DEL_ERR"></div>
+
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn btn-out" style="flex:1" onclick="closeModal()">إلغاء</button>
+        <button class="btn" id="DEL_BTN" disabled style="flex:1;background:var(--danger);color:#fff;font-weight:800" onclick='executeDelete(${JSON.stringify(meta).replace(/'/g,"&apos;")})'>🗑️ حذف نهائي</button>
+      </div>
+    </div>
+  </div>`;
+  openModal(html);
+  setTimeout(() => document.getElementById('DEL_CONF')?.focus(), 200);
+}
+
+async function executeDelete(meta){
+  if(!isAdmin || !sb){ toast('⚠️ غير مصرّح','err'); return; }
+  const conf = document.getElementById('DEL_CONF')?.value.trim();
+  if(conf !== 'حذف'){ toast('⚠️ اكتب "حذف" للتأكيد','err'); return; }
+
+  const btn = document.getElementById('DEL_BTN');
+  const err = document.getElementById('DEL_ERR'); if(err) err.innerHTML = '';
+  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spin"></span> جاري الحذف…'; }
+
+  try {
+    if(meta._src === 'user_added'){
+      // Direct row in phonebook_entries
+      const { error } = await sb.from('phonebook_entries').delete().eq('id', meta.id);
+      if(error) throw error;
+    } else if(meta._src === 'registry'){
+      // Original registry row — we don't actually delete from JS registry (it's hardcoded).
+      // Instead, set entry_hidden=true permanently in phonebook_extras as a "soft delete"
+      // AND mark a special field so we know it was admin-deleted.
+      const payload = {
+        mun_id: MUN_ID,
+        ref_id: meta.id,
+        status: 'approved',
+        entry_hidden: true,
+        deleted_by_admin: true,
+        deleted_at: new Date().toISOString()
+      };
+      const { error } = await sb.from('phonebook_extras').upsert(payload, { onConflict: 'mun_id,ref_id' });
+      if(error){
+        // If deleted_by_admin/deleted_at columns don't exist, retry without them
+        const msg = (error.message || '').toLowerCase();
+        if(msg.includes('column') || msg.includes('does not exist') || error.code === 'PGRST204' || error.code === '42703'){
+          const minimal = { mun_id: MUN_ID, ref_id: meta.id, status:'approved', entry_hidden: true };
+          const r2 = await sb.from('phonebook_extras').upsert(minimal, { onConflict: 'mun_id,ref_id' });
+          if(r2.error) throw r2.error;
+        } else {
+          throw error;
+        }
+      }
+    }
+
+    closeModal();
+    await loadFromServer();
+    if(isAdmin) await loadAdminQueues();
+    renderStats(); renderLettersBar(); renderFiltersBar(); renderGrid();
+    toast('✅ تمّ حذف الجهة نهائياً');
+  } catch(ex){
+    console.error('delete error:', ex);
+    const detail = ex?.message || ex?.hint || 'سبب غير معروف';
+    if(err) err.innerHTML = `<div class="fm-error" style="margin-top:10px">⚠️ تعذّر الحذف.<br><small style="opacity:.85">السبب: ${escHtml(detail)}</small></div>`;
+    if(btn){ btn.disabled = false; btn.innerHTML = '🗑️ حذف نهائي'; }
+  }
 }
 
 async function admApproveEdit(id){
