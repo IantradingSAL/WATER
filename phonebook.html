@@ -1521,6 +1521,7 @@ function buildShareMessage(c){
 
 // Open a small "share via" picker so the user chooses how to share
 function shareContact(c){
+  window.__SHR_CONTACT = c;  // keep the full contact for vCard generation
   const text = buildShareMessage(c);
   const html = `<div class="modal" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
@@ -1532,18 +1533,27 @@ function shareContact(c){
       <button class="modal-x" onclick="closeModal()" aria-label="إغلاق">✕</button>
     </div>
     <div class="modal-bd">
+
+      <button class="btn btn-prim btn-block" style="background:linear-gradient(135deg,var(--blue),var(--blue2));margin-bottom:12px;padding:15px 18px;font-size:15px" onclick="shareAsVCard()">
+        <span style="font-size:22px">📇</span>
+        <span style="display:flex;flex-direction:column;align-items:flex-start;line-height:1.25">
+          <span style="font-weight:800">حفظ في جهات الاتصال</span>
+          <span style="font-size:11.5px;font-weight:500;opacity:.85">يفتح بطاقة جاهزة للحفظ في هاتفك</span>
+        </span>
+      </button>
+
       <div class="fm-info" style="margin-bottom:12px">
-        💡 رسالة كاملة بكل التفاصيل: الاسم، الهاتف، العنوان، الموقع على الخريطة، ومعلومات العمل (إن وُجدت).
+        💡 أو شارك الرسالة كنصّ — تحتوي كل التفاصيل والموقع على الخريطة:
       </div>
 
-      <div style="background:var(--surface2);padding:13px;border-radius:var(--r);font-size:12.5px;line-height:1.7;white-space:pre-wrap;direction:rtl;text-align:right;max-height:240px;overflow-y:auto;border:1px solid var(--border);font-family:monospace,var(--font);" id="SHR_PREVIEW">${escHtml(text)}</div>
+      <div style="background:var(--surface2);padding:13px;border-radius:var(--r);font-size:12.5px;line-height:1.7;white-space:pre-wrap;direction:rtl;text-align:right;max-height:200px;overflow-y:auto;border:1px solid var(--border);font-family:monospace,var(--font);" id="SHR_PREVIEW">${escHtml(text)}</div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
         <button class="btn share-btn-wa" onclick="shareViaWhatsapp()">
           <span class="share-btn-i">${WA_LOGO_SVG}</span>
           <span>واتساب</span>
         </button>
-        <button class="btn btn-prim" onclick="shareViaSystem()">
+        <button class="btn btn-out" onclick="shareViaSystem()">
           <span style="font-size:18px">📤</span> مشاركة عامّة
         </button>
         <button class="btn btn-out" onclick="shareCopy()">
@@ -1563,6 +1573,97 @@ function shareContact(c){
 
 function _getShareText(){ return document.getElementById('SHR_TEXT')?.value || ''; }
 function _getShareName(){ return document.getElementById('SHR_NAME')?.value || 'جهة اتصال'; }
+
+// Build a standards-compliant vCard 3.0 string
+function buildVCard(c){
+  const lines = ['BEGIN:VCARD','VERSION:3.0'];
+  // Name fields
+  // FN = formatted full name; N = structured (Family;Given;Middle;Prefix;Suffix)
+  lines.push(`FN:${c.name || ''}`);
+  lines.push(`N:${c.family || ''};${c.first || ''};${c.father || ''};;`);
+  if(c.family) lines.push(`X-FAMILY:${c.family}`);
+  if(c.father) lines.push(`X-FATHER:${c.father}`);
+  if(c.mother) lines.push(`X-MOTHER:${c.mother}`);
+
+  // Phones
+  if(c.phone && !c.phone_hidden){
+    lines.push(`TEL;TYPE=CELL,VOICE,pref:${c.phone}`);
+    // WhatsApp-friendly secondary entry
+    if(c.cc === 'lb' && !c.disable_wa && c.wa){
+      lines.push(`X-WHATSAPP:+${c.wa}`);
+    }
+  }
+  if(c.work_phone) lines.push(`TEL;TYPE=WORK,VOICE:${c.work_phone}`);
+
+  // Email
+  if(c.email) lines.push(`EMAIL;TYPE=INTERNET:${c.email}`);
+
+  // Addresses (ADR: PO;Extended;Street;City;State;Zip;Country)
+  if(c.address && !c.address_hidden){
+    lines.push(`ADR;TYPE=HOME:;;${c.address.replace(/\n/g,', ')};وادي الست;الشوف;;لبنان`);
+  }
+  if(c.work_address){
+    lines.push(`ADR;TYPE=WORK:;;${c.work_address.replace(/\n/g,', ')};;;;لبنان`);
+  }
+
+  // Geo (only one — use personal first, then work)
+  if(c.lat && c.lng && !c.address_hidden){
+    lines.push(`GEO:${c.lat};${c.lng}`);
+    lines.push(`URL;TYPE=Map:https://maps.google.com/?q=${c.lat},${c.lng}`);
+  } else if(c.work_lat && c.work_lng){
+    lines.push(`GEO:${c.work_lat};${c.work_lng}`);
+    lines.push(`URL;TYPE=Map:https://maps.google.com/?q=${c.work_lat},${c.work_lng}`);
+  }
+
+  // Title / occupation
+  if(c.occupation){ lines.push(`TITLE:${c.occupation}`); lines.push(`ROLE:${c.occupation}`); }
+  if(c.notes) lines.push(`NOTE:${c.notes.replace(/\n/g,'\\n')}`);
+
+  // Photo (if present, embed as base64)
+  if(c.image && c.image.startsWith('data:image/')){
+    const m = c.image.match(/^data:image\/(\w+);base64,(.+)$/);
+    if(m) lines.push(`PHOTO;ENCODING=b;TYPE=${m[1].toUpperCase()}:${m[2]}`);
+  }
+
+  // Source / categories
+  lines.push('CATEGORIES:دليل وادي الست');
+  lines.push(`REV:${new Date().toISOString()}`);
+  lines.push('END:VCARD');
+  return lines.join('\r\n');
+}
+
+function shareAsVCard(){
+  // Reconstruct vCard from the same contact stored in dataset on the modal
+  const c = window.__SHR_CONTACT;
+  if(!c){ toast('⚠️ تعذّر إنشاء البطاقة','err'); return; }
+  const vcf = buildVCard(c);
+  const blob = new Blob([vcf], { type: 'text/vcard;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const safeName = (c.name || 'contact').replace(/[^a-z\u0600-\u06FF0-9 _-]/gi, '').slice(0,40) || 'contact';
+
+  // On mobile, navigator.share with files works on iOS 16+ and Android Chrome
+  const file = new File([blob], `${safeName}.vcf`, { type: 'text/vcard' });
+  if(navigator.canShare && navigator.canShare({ files: [file] })){
+    navigator.share({
+      title: c.name,
+      text: `جهة اتصال: ${c.name} — من دليل وادي الست`,
+      files: [file]
+    }).then(()=> toast('✅ تمت المشاركة')).catch(err => {
+      if(err.name !== 'AbortError') downloadVCardFallback(url, safeName);
+    });
+  } else {
+    downloadVCardFallback(url, safeName);
+  }
+}
+function downloadVCardFallback(url, safeName){
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${safeName}.vcf`;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+  toast('✅ تم تنزيل البطاقة — افتحها لإضافتها لجهات الاتصال');
+}
 
 function shareViaWhatsapp(){
   const text = _getShareText();
