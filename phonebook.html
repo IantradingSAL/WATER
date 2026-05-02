@@ -712,7 +712,15 @@ function lossyAlpha(s){
     .replace(/[^a-z\s]/g,'')
     .replace(/\s+/g,' ').trim();
 }
-function digitsOnly(s){ return (s||'').toString().replace(/\D/g,''); }
+// Convert Arabic-Indic (٠١٢٣٤٥٦٧٨٩) and Persian (۰۱۲۳۴۵۶۷۸۹) digits to Latin (0-9)
+function toLatinDigits(s){
+  if(!s) return '';
+  return s.toString()
+    .replace(/[\u0660-\u0669]/g, d => String.fromCharCode(d.charCodeAt(0) - 0x0660 + 48))  // Arabic-Indic
+    .replace(/[\u06F0-\u06F9]/g, d => String.fromCharCode(d.charCodeAt(0) - 0x06F0 + 48)); // Extended Arabic-Indic (Persian)
+}
+// digitsOnly: now first converts any Arabic/Persian digits to Latin, then strips non-digits
+function digitsOnly(s){ return toLatinDigits(s||'').replace(/\D/g,''); }
 
 // === Cultural / common-spelling aliases (Arabic word → Latin variants) ===
 // Catches mappings pure transliteration misses (Joseph↔Yousef, John↔Hanna, etc.)
@@ -1382,6 +1390,12 @@ function openDetail(c){
         <button class="btn btn-purp btn-sm" style="flex:1" onclick='openAdminEdit(${JSON.stringify(c).replace(/'/g,"&apos;")})'>✏️ تعديل مباشر (إدمن)</button>
       </div>
 
+      ${c.phone && (!c.wa || c.wa.length < 8 || digitsOnly(c.phone) !== c.wa) ? `
+      <div style="margin-top:9px;padding:10px 12px;background:#fff8e6;border:1px solid var(--sun);border-radius:var(--r)">
+        <div style="font-size:12px;color:#7a5500;margin-bottom:6px">⚠️ <strong>رابط واتساب معطّل لهذه الجهة</strong> — الرقم محفوظ بأرقام عربية أو فيه مشكلة تنسيق.</div>
+        <button class="btn btn-sm" style="width:100%;background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;font-weight:800" onclick='fixWhatsappLink(${JSON.stringify({id:c.id,_src:c._src,phone:c.phone}).replace(/'/g,"&apos;")})'>🔧 إصلاح رابط الواتساب تلقائياً</button>
+      </div>` : ''}
+
       <div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)">
         <div style="font-size:11px;font-weight:800;color:var(--danger);margin-bottom:6px;letter-spacing:.4px">⚠️ منطقة الحذف الدائم</div>
         <div style="font-size:11.5px;color:var(--text2);line-height:1.55;margin-bottom:8px">الحذف لا يمكن التراجع عنه. إذا كنت تريد فقط إخفاء الجهة، استخدم الزرّ أعلاه.</div>
@@ -1715,7 +1729,7 @@ function shareViaEmail(){
 // HIDE TOGGLE (admin only)
 // ═══════════════════════════════════════════════════════════════════════════
 async function toggleHide(srcType, contactId, field, btn){
-  if(!isAdmin || !sb) return;
+  if(!isAdmin || !sb){ toast('⚠️ يجب تسجيل الدخول كأدمن أولاً','err'); return; }
   const willOn = !btn.classList.contains('on');
   btn.classList.toggle('on', willOn);
   try {
@@ -1724,6 +1738,9 @@ async function toggleHide(srcType, contactId, field, btn){
       const existing = EXTRAS[refId] || {};
       const payload = { mun_id: MUN_ID, ref_id: refId, ...existing, [field]: willOn, status:'approved' };
       delete payload.id;
+      // Strip columns that may not exist in older schemas
+      delete payload.deleted_by_admin;
+      delete payload.deleted_at;
       const { data, error } = await sb.from('phonebook_extras').upsert(payload, { onConflict: 'mun_id,ref_id' }).select().single();
       if(error) throw error;
       EXTRAS[refId] = { ...EXTRAS[refId], [field]: willOn };
@@ -1732,18 +1749,20 @@ async function toggleHide(srcType, contactId, field, btn){
       if(error) throw error;
       ADDED = ADDED.map(a => a.id === contactId ? { ...a, [field]: willOn } : a);
     }
-    toast('✅ تم الحفظ', 'ok');
+    toast(willOn ? '✅ تم الإخفاء — أصبحت غير مرئية للزوّار' : '✅ تمّت إعادة الإظهار', 'ok');
+    closeModal();
     renderGrid(); renderStats();
   } catch(ex){
     btn.classList.toggle('on', !willOn);
-    console.error(ex);
-    toast('⚠️ تعذّر الحفظ', 'err');
+    console.error('toggleHide error:', ex);
+    const detail = ex?.message || ex?.hint || 'سبب غير معروف';
+    toast(`⚠️ تعذّر الحفظ: ${detail.slice(0,80)}`, 'err');
   }
 }
 
 // Set 3 phone-related flags together based on radio choice
 async function setPhoneMode(srcType, contactId, mode){
-  if(!isAdmin || !sb) return;
+  if(!isAdmin || !sb){ toast('⚠️ يجب تسجيل الدخول كأدمن أولاً','err'); return; }
   const flags = { phone_hidden:false, disable_call:false, disable_wa:false };
   if(mode === 'hidden')   flags.phone_hidden = true;
   if(mode === 'call_only') flags.disable_wa  = true;
@@ -1755,6 +1774,8 @@ async function setPhoneMode(srcType, contactId, mode){
       const existing = EXTRAS[refId] || {};
       const payload = { mun_id: MUN_ID, ref_id: refId, ...existing, ...flags, status:'approved' };
       delete payload.id;
+      delete payload.deleted_by_admin;
+      delete payload.deleted_at;
       const { error } = await sb.from('phonebook_extras').upsert(payload, { onConflict: 'mun_id,ref_id' });
       if(error) throw error;
       EXTRAS[refId] = { ...EXTRAS[refId], ...flags };
@@ -1764,14 +1785,14 @@ async function setPhoneMode(srcType, contactId, mode){
       ADDED = ADDED.map(a => a.id === contactId ? { ...a, ...flags } : a);
     }
     toast('✅ تم تطبيق الإعدادات', 'ok');
-    // Update UI labels in the radio group
     document.querySelectorAll(`input[name="pm_${contactId}"]`).forEach(r => {
       r.parentElement.classList.toggle('on', r.checked);
     });
     renderGrid(); renderStats();
   } catch(ex){
-    console.error(ex);
-    toast('⚠️ تعذّر الحفظ', 'err');
+    console.error('setPhoneMode error:', ex);
+    const detail = ex?.message || ex?.hint || 'سبب غير معروف';
+    toast(`⚠️ تعذّر الحفظ: ${detail.slice(0,80)}`, 'err');
   }
 }
 
@@ -2387,14 +2408,18 @@ async function submitAdd(e){
   let work_lat=null, work_lng=null;
   if(wll){ const p=wll.split(',').map(s=>parseFloat(s.trim())); if(p.length===2&&!isNaN(p[0])&&!isNaN(p[1])){ work_lat=p[0]; work_lng=p[1]; } }
 
-  const wa = phone.replace(/[^\d]/g,'');
-  const cc = phone.startsWith('+961') ? 'lb' : 'other';
+  // Normalize Arabic-Indic / Persian digits to Latin so wa link works
+  const phoneNorm = toLatinDigits(phone).replace(/\s+/g,'').trim();
+  const wa = digitsOnly(phoneNorm);
+  const cc = phoneNorm.startsWith('+961') ? 'lb' : 'other';
+  // Also normalize work_phone digits
+  const wphNorm = wph ? toLatinDigits(wph).replace(/\s+/g,'').trim() : '';
 
   // Full payload
   const fullEntry = {
     mun_id: MUN_ID, name: full, first, family: fam, father, mother,
-    phone, wa, cc, occupation, email, address, lat, lng,
-    work_phone: wph, work_address: waddr, work_lat, work_lng,
+    phone: phoneNorm, wa, cc, occupation, email, address, lat, lng,
+    work_phone: wphNorm, work_address: waddr, work_lat, work_lng,
     notes, image: img,
     submitter_name: byNm, submitter_phone: byPh,
     status:'pending', source:'user_added'
@@ -2420,14 +2445,14 @@ async function submitAdd(e){
           // Attempt 2: drop work_*, image, mother, source, submitter_* (older schema)
           const minimal = {
             mun_id: MUN_ID, name: full, first, family: fam, father,
-            phone, wa, cc, occupation, email, address, lat, lng,
+            phone: phoneNorm, wa, cc, occupation, email, address, lat, lng,
             notes,
             status:'pending'
           };
           const r2 = await tryInsert(minimal);
           if(r2.error){
             // Attempt 3: bare minimum
-            const bare = { mun_id: MUN_ID, name: full, first, family: fam, phone, wa, cc, status:'pending' };
+            const bare = { mun_id: MUN_ID, name: full, first, family: fam, phone: phoneNorm, wa, cc, status:'pending' };
             const r3 = await tryInsert(bare);
             if(r3.error) throw r3.error;
             data = r3.data; error = null;
@@ -2688,6 +2713,51 @@ async function admRejectEntry(id){
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// FIX WHATSAPP LINK — repairs broken wa field on an existing entry
+// (e.g. when phone was saved with Arabic-Indic digits like ٠١٢٣)
+// ═══════════════════════════════════════════════════════════════════════════
+async function fixWhatsappLink(meta){
+  if(!isAdmin || !sb){ toast('⚠️ ميزة للأدمن فقط','err'); return; }
+  if(!meta.phone){ toast('⚠️ لا يوجد رقم لإصلاحه','err'); return; }
+
+  // Normalize: convert any Arabic-Indic / Persian digits to Latin, strip spaces
+  const phoneNorm = toLatinDigits(meta.phone).replace(/\s+/g,'').trim();
+  const wa = digitsOnly(phoneNorm);
+  const cc = phoneNorm.startsWith('+961') ? 'lb' : 'other';
+
+  if(wa.length < 8){
+    toast(`⚠️ الرقم بعد التنظيف قصير جداً (${wa.length} رقم) — عدّله يدوياً`, 'err');
+    return;
+  }
+
+  try {
+    if(meta._src === 'user_added'){
+      const { error } = await sb.from('phonebook_entries').update({ phone: phoneNorm, wa, cc }).eq('id', meta.id);
+      if(error) throw error;
+      ADDED = ADDED.map(a => a.id === meta.id ? { ...a, phone: phoneNorm, wa, cc } : a);
+    } else {
+      // Registry: store override in phonebook_extras
+      const refId = parseInt(meta.id);
+      const existing = EXTRAS[refId] || {};
+      const payload = { mun_id: MUN_ID, ref_id: refId, ...existing, phone: phoneNorm, wa, cc, status:'approved' };
+      delete payload.id;
+      delete payload.deleted_by_admin;
+      delete payload.deleted_at;
+      const { error } = await sb.from('phonebook_extras').upsert(payload, { onConflict: 'mun_id,ref_id' });
+      if(error) throw error;
+      EXTRAS[refId] = { ...EXTRAS[refId], phone: phoneNorm, wa, cc };
+    }
+    closeModal();
+    renderGrid(); renderStats();
+    toast(`✅ تم إصلاح الرابط — الرقم: ${phoneNorm}`, 'ok');
+  } catch(ex){
+    console.error('fixWhatsappLink error:', ex);
+    const detail = ex?.message || ex?.hint || 'سبب غير معروف';
+    toast(`⚠️ تعذّر الإصلاح: ${detail.slice(0,80)}`, 'err');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // PERMANENT DELETE — admin only, two-step confirmation
 // ═══════════════════════════════════════════════════════════════════════════
 function confirmDeleteContact(meta){
@@ -2853,15 +2923,22 @@ async function submitAdminEdit(e, c){
   if(!isAdmin || !sb) return;
   const btn = document.getElementById('ED_SUB');
   const err = document.getElementById('ED_ERR'); err.innerHTML='';
+  // Normalize Arabic-Indic / Persian digits in any phone field
+  const phoneRaw = document.getElementById('ED_PH').value.trim();
+  const phone = toLatinDigits(phoneRaw).replace(/\s+/g,'').trim();
+  const wphRaw = document.getElementById('ED_WPH').value.trim();
+  const work_phone = toLatinDigits(wphRaw).replace(/\s+/g,'').trim();
   const newVals = {
     first: document.getElementById('ED_FIRST').value.trim(),
     family: document.getElementById('ED_FAM').value.trim(),
     name: document.getElementById('ED_FULL').value.trim(),
-    phone: document.getElementById('ED_PH').value.trim(),
+    phone,
+    wa: digitsOnly(phone),
+    cc: phone.startsWith('+961') ? 'lb' : (phone ? 'other' : null),
     address: document.getElementById('ED_ADDR').value.trim(),
     email: document.getElementById('ED_EMAIL').value.trim(),
     occupation: document.getElementById('ED_OCC').value.trim(),
-    work_phone: document.getElementById('ED_WPH').value.trim(),
+    work_phone,
     work_address: document.getElementById('ED_WADDR').value.trim(),
   };
   const ll = document.getElementById('ED_LL').value.trim();
