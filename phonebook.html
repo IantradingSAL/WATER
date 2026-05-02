@@ -1447,10 +1447,126 @@ function openDetail(c){
 }
 
 function copyText(t){ navigator.clipboard.writeText(t).then(()=> toast('✅ تم النسخ')); }
+
+// Build a beautifully formatted multi-line message with EVERY detail of a contact
+function buildShareMessage(c){
+  const lines = [];
+  lines.push('📒 *دليل وادي الست — جهة اتصال*');
+  lines.push('━━━━━━━━━━━━━━━━━━━━');
+  lines.push('');
+  lines.push(`👤 *${c.name || ''}*`);
+  if(c.family) lines.push(`👨‍👩‍👧 آل ${c.family}`);
+  if(c.father) lines.push(`👨 الأب: ${c.father}`);
+  if(c.mother) lines.push(`👩 الأم: ${c.mother}`);
+  lines.push('');
+
+  // Personal contact
+  if(c.phone && !c.phone_hidden){
+    lines.push(`📞 *الهاتف:* ${fmtPhone(c.phone)}`);
+    if(c.cc === 'lb' && !c.disable_wa && c.wa) lines.push(`💬 *واتساب:* https://wa.me/${c.wa}`);
+  } else if(c.phone_hidden){
+    lines.push(`🔒 الرقم مخفي بطلب صاحبه`);
+  }
+  if(c.email) lines.push(`✉️ *البريد:* ${c.email}`);
+  if(c.address && !c.address_hidden) lines.push(`📍 *العنوان:* ${c.address}`);
+  if(c.lat && c.lng && !c.address_hidden){
+    lines.push(`🗺️ *الموقع على الخريطة:*`);
+    lines.push(`https://www.google.com/maps?q=${c.lat},${c.lng}`);
+  }
+
+  // Work
+  const hasWork = c.occupation || c.work_phone || c.work_address || (c.work_lat && c.work_lng);
+  if(hasWork){
+    lines.push('');
+    lines.push('━ *معلومات العمل* ━');
+    if(c.occupation) lines.push(`💼 *المهنة:* ${c.occupation}`);
+    if(c.work_phone) lines.push(`☎️ *هاتف العمل:* ${fmtPhone(c.work_phone)}`);
+    if(c.work_address) lines.push(`🏢 *عنوان العمل:* ${c.work_address}`);
+    if(c.work_lat && c.work_lng){
+      lines.push(`🗺️ *موقع العمل:*`);
+      lines.push(`https://www.google.com/maps?q=${c.work_lat},${c.work_lng}`);
+    }
+  }
+
+  // Notes
+  if(c.notes){
+    lines.push('');
+    lines.push(`📝 *ملاحظات:* ${c.notes}`);
+  }
+
+  lines.push('');
+  lines.push('━━━━━━━━━━━━━━━━━━━━');
+  lines.push('📒 من دليل بلدية وادي الست');
+  lines.push('https://iantradingsal.github.io/WATER/phonebook.html');
+
+  return lines.join('\n');
+}
+
+// Open a small "share via" picker so the user chooses how to share
 function shareContact(c){
-  const text = `${c.name}\n${c.phone && !c.phone_hidden?'📞 '+c.phone+'\n':''}${c.occupation?'💼 '+c.occupation+'\n':''}${c.work_phone?'☎️ '+c.work_phone+'\n':''}${c.address && !c.address_hidden?'📍 '+c.address+'\n':''}— من دليل وادي الست`;
-  if(navigator.share) navigator.share({ title: c.name, text }).catch(()=>{});
-  else copyText(text);
+  const text = buildShareMessage(c);
+  const html = `<div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd">
+      <div class="modal-hd-content">
+        <div class="modal-t">🔗 مشاركة جهة الاتصال</div>
+        <div class="modal-s">${escHtml(c.name||'')}</div>
+      </div>
+      <button class="modal-x" onclick="closeModal()" aria-label="إغلاق">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div class="fm-info" style="margin-bottom:12px">
+        💡 رسالة كاملة بكل التفاصيل: الاسم، الهاتف، العنوان، الموقع على الخريطة، ومعلومات العمل (إن وُجدت).
+      </div>
+
+      <div style="background:var(--surface2);padding:13px;border-radius:var(--r);font-size:12.5px;line-height:1.7;white-space:pre-wrap;direction:rtl;text-align:right;max-height:240px;overflow-y:auto;border:1px solid var(--border);font-family:monospace,var(--font);" id="SHR_PREVIEW">${escHtml(text)}</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
+        <button class="btn btn-grn" onclick="shareViaWhatsapp()" style="background:linear-gradient(135deg,#25D366,#128C7E)">
+          <span style="font-size:18px">💬</span> واتساب
+        </button>
+        <button class="btn btn-prim" onclick="shareViaSystem()">
+          <span style="font-size:18px">📤</span> مشاركة عامّة
+        </button>
+        <button class="btn btn-out" onclick="shareCopy()">
+          <span style="font-size:18px">📋</span> نسخ النصّ
+        </button>
+        <button class="btn btn-out" onclick="shareViaEmail()">
+          <span style="font-size:18px">✉️</span> بريد إلكتروني
+        </button>
+      </div>
+
+      <input type="hidden" id="SHR_TEXT" value="${escHtml(text)}">
+      <input type="hidden" id="SHR_NAME" value="${escHtml(c.name||'')}">
+    </div>
+  </div>`;
+  openModal(html);
+}
+
+function _getShareText(){ return document.getElementById('SHR_TEXT')?.value || ''; }
+function _getShareName(){ return document.getElementById('SHR_NAME')?.value || 'جهة اتصال'; }
+
+function shareViaWhatsapp(){
+  const text = _getShareText();
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+}
+function shareViaSystem(){
+  const text = _getShareText();
+  const name = _getShareName();
+  if(navigator.share){
+    navigator.share({ title: name, text }).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(text).then(()=> toast('✅ تم نسخ النصّ، ألصِقه أينما تريد'));
+  }
+}
+function shareCopy(){
+  const text = _getShareText();
+  navigator.clipboard.writeText(text).then(()=> toast('✅ تم نسخ كل التفاصيل'));
+}
+function shareViaEmail(){
+  const text = _getShareText();
+  const name = _getShareName();
+  window.location.href = `mailto:?subject=${encodeURIComponent('جهة اتصال: '+name)}&body=${encodeURIComponent(text)}`;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1801,7 +1917,7 @@ function openAdd(){
     </div>
     <div class="modal-bd">
       <div class="fm-warn">⚠️ لن تظهر الجهة في الدليل العام إلا بعد موافقة البلدية.</div>
-      <form class="fm" id="AD_FM" onsubmit="submitAdd(event)" style="margin-top:14px">
+      <form class="fm" id="AD_FM" novalidate style="margin-top:14px">
         <div class="fm-grp">
           <label class="fm-l">الصورة <span class="opt">(اختياري)</span></label>
           <label class="fm-img-area" id="AD_IMG_LBL" for="AD_IMG_INPUT">
@@ -1811,20 +1927,24 @@ function openAdd(){
         </div>
 
         <div class="fm-grp row2">
-          <div><label class="fm-l">الاسم الأول <span class="req">*</span></label><input class="fm-i" id="AD_FIRST" required placeholder="مثال: ميشال"></div>
+          <div><label class="fm-l">الاسم الأول <span class="req">*</span></label><input class="fm-i" id="AD_FIRST" placeholder="مثال: عماد"></div>
           <div>
             <label class="fm-l">العائلة <span class="req">*</span></label>
-            <select class="fm-i" id="AD_FAM" required></select>
+            <select class="fm-i" id="AD_FAM"></select>
             <div class="fm-help">إذا كانت عائلتك غير موجودة، تواصل مع البلدية لإضافتها.</div>
           </div>
         </div>
+        <div class="fm-grp row2">
+          <div><label class="fm-l">اسم الأب <span class="req">*</span></label><input class="fm-i" id="AD_FATHER" placeholder="مثال: بطرس"></div>
+          <div><label class="fm-l">اسم الأم <span class="opt">(اختياري)</span></label><input class="fm-i" id="AD_MOTHER" placeholder="مثال: سميرة"></div>
+        </div>
         <div class="fm-grp">
           <label class="fm-l">الاسم الكامل <span class="opt">(يُملأ تلقائياً)</span></label>
-          <input class="fm-i" id="AD_FULL" placeholder="مثال: ميشال فؤاد مقصود">
+          <input class="fm-i" id="AD_FULL" placeholder="مثال: عماد بطرس أبي الحسن">
         </div>
         <div class="fm-grp">
           <label class="fm-l">رقم الهاتف الشخصي <span class="req">*</span></label>
-          <input class="fm-i ltr" id="AD_PH" required placeholder="+961..." inputmode="tel">
+          <input class="fm-i ltr" id="AD_PH" placeholder="+961 76 ..." inputmode="tel">
         </div>
         <div class="fm-grp">
           <label class="fm-l">العنوان <span class="opt">(اختياري)</span></label>
@@ -1870,12 +1990,12 @@ function openAdd(){
 
         <div class="fm-info">👤 معلوماتك للتحقق:</div>
         <div class="fm-grp row2">
-          <div><label class="fm-l">اسمك <span class="req">*</span></label><input class="fm-i" id="AD_BY_NM" required></div>
-          <div><label class="fm-l">هاتفك <span class="req">*</span></label><input class="fm-i ltr" id="AD_BY_PH" required inputmode="tel"></div>
+          <div><label class="fm-l">اسمك <span class="req">*</span></label><input class="fm-i" id="AD_BY_NM"></div>
+          <div><label class="fm-l">هاتفك <span class="req">*</span></label><input class="fm-i ltr" id="AD_BY_PH" inputmode="tel"></div>
         </div>
 
         <div id="AD_ERR"></div>
-        <button type="submit" class="btn btn-grn btn-block" id="AD_SUB">➕ إرسال للمراجعة</button>
+        <button type="button" class="btn btn-grn btn-block" id="AD_SUB" onclick="submitAdd(event)">➕ إرسال للمراجعة</button>
       </form>
     </div>
   </div>`;
@@ -1888,12 +2008,21 @@ function openAdd(){
   const updateFull = () => {
     const f = document.getElementById('AD_FIRST').value.trim();
     const fa = document.getElementById('AD_FAM').value.trim();
+    const fath = document.getElementById('AD_FATHER').value.trim();
     const fullEl = document.getElementById('AD_FULL');
-    if(!fullEl.dataset.touched && f && fa) fullEl.value = `${f} ${fa}`;
+    if(!fullEl.dataset.touched){
+      // Build full name with optional father
+      const parts = [f, fath, fa].filter(Boolean);
+      if(parts.length >= 2) fullEl.value = parts.join(' ');
+    }
   };
   document.getElementById('AD_FIRST').addEventListener('input', updateFull);
+  document.getElementById('AD_FATHER').addEventListener('input', updateFull);
   document.getElementById('AD_FAM').addEventListener('change', updateFull);
   document.getElementById('AD_FULL').addEventListener('input', e => e.target.dataset.touched = '1');
+
+  // Block any accidental form submission (Enter key etc.) — submit only via the button
+  document.getElementById('AD_FM').addEventListener('submit', e => { e.preventDefault(); return false; });
 }
 
 function onImgPick(e, prefix){
@@ -1919,25 +2048,172 @@ function removeImg(prefix){
 }
 
 function useMyLocation(targetId, ev){
-  if(!navigator.geolocation){ toast('⚠️ الموقع غير مدعوم','err'); return; }
-  const btn = ev.target.closest('button');
-  const orig = btn.innerHTML;
-  btn.innerHTML = '<span class="spin"></span>'; btn.disabled = true;
+  // 1. Find the button reliably (even if user tapped icon inside)
+  let btn = null;
+  try {
+    if(ev && ev.currentTarget) btn = ev.currentTarget.closest ? ev.currentTarget.closest('button') : ev.currentTarget;
+    else if(ev && ev.target) btn = ev.target.closest ? ev.target.closest('button') : ev.target;
+  } catch(_){}
+  if(!btn) btn = document.activeElement && document.activeElement.tagName === 'BUTTON' ? document.activeElement : null;
+
+  const setBtn = (html, disabled) => { if(btn){ btn.innerHTML = html; btn.disabled = !!disabled; } };
+  const restore = () => setBtn('📍 موقعي', false);
+
+  // 2. Check if geolocation is supported
+  if(!navigator.geolocation){
+    toast('⚠️ متصفّحك لا يدعم تحديد الموقع — أدخل الإحداثيات يدوياً','err');
+    return;
+  }
+
+  // 3. Check if running on insecure HTTP (geolocation requires HTTPS)
+  if(location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1'){
+    toast('⚠️ يجب فتح الموقع عبر HTTPS لاستخدام GPS','err');
+    return;
+  }
+
+  // 4. Show loading
+  setBtn('<span class="spin"></span>', true);
+  let resolved = false;
+  // Safety timeout in case the browser never replies
+  const safety = setTimeout(() => {
+    if(!resolved){
+      resolved = true;
+      restore();
+      showLocationHelp('timeout');
+    }
+  }, 16000);
+
   navigator.geolocation.getCurrentPosition(
-    pos => { document.getElementById(targetId).value = pos.coords.latitude.toFixed(6)+', '+pos.coords.longitude.toFixed(6); btn.innerHTML=orig; btn.disabled=false; toast('✅ تم استخدام موقعك'); },
-    err => { btn.innerHTML=orig; btn.disabled=false; toast('⚠️ تعذّر الحصول على الموقع','err'); },
-    { enableHighAccuracy:true, timeout:10000 }
+    pos => {
+      if(resolved) return;
+      resolved = true; clearTimeout(safety);
+      const target = document.getElementById(targetId);
+      if(target) target.value = pos.coords.latitude.toFixed(6) + ', ' + pos.coords.longitude.toFixed(6);
+      restore();
+      toast('✅ تم استخدام موقعك');
+    },
+    err => {
+      if(resolved) return;
+      resolved = true; clearTimeout(safety);
+      restore();
+      // Give specific guidance based on error code
+      let reason = 'unknown';
+      if(err && err.code === 1) reason = 'denied';     // PERMISSION_DENIED
+      else if(err && err.code === 2) reason = 'unavailable'; // POSITION_UNAVAILABLE
+      else if(err && err.code === 3) reason = 'timeout';
+      console.warn('Geolocation error:', err);
+      showLocationHelp(reason);
+    },
+    { enableHighAccuracy:true, timeout:14000, maximumAge:60000 }
   );
 }
 
+// Friendly modal explaining how to enable GPS on each platform
+function showLocationHelp(reason){
+  const reasonText = {
+    denied:       'لم تسمح للموقع بالوصول إلى GPS — يجب تفعيله من إعدادات الجهاز والمتصفّح.',
+    unavailable:  'تعذّر تحديد موقعك. تأكّد من تفعيل GPS على هاتفك.',
+    timeout:      'استغرق تحديد الموقع وقتاً طويلاً. تأكّد من تفعيل GPS وأنّك في مكان مفتوح.',
+    unknown:      'حدث خطأ غير معروف. تأكّد من تفعيل خدمات الموقع.'
+  }[reason] || 'تأكّد من تفعيل خدمات الموقع.';
+
+  const html = `<div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd sun">
+      <div class="modal-hd-content">
+        <div class="modal-t">📍 لتفعيل تحديد موقعك</div>
+        <div class="modal-s">يحتاج التطبيق إذن الوصول إلى GPS</div>
+      </div>
+      <button class="modal-x" onclick="closeModal()" aria-label="إغلاق">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div class="fm-error" style="margin-bottom:14px">⚠️ ${escHtml(reasonText)}</div>
+
+      <div class="help-step blue">
+        <div class="help-step-i">📱</div>
+        <div class="help-step-text">
+          <div class="help-step-t">على iPhone (iOS)</div>
+          <div class="help-step-d">
+            ١. <strong>الإعدادات</strong> → <strong>الخصوصية والأمان</strong> → <strong>خدمات الموقع</strong> ← شغّلها<br>
+            ٢. مرّر للأسفل واختر <strong>Safari</strong> أو <strong>Chrome</strong> ← اختر <strong>"عند استخدام التطبيق"</strong> أو <strong>"اسأل في المرة التالية"</strong><br>
+            ٣. ارجع لصفحة الدليل واضغط زرّ "📍 موقعي" مرّة أخرى<br>
+            ٤. عندما يظهر طلب الإذن، اضغط <strong>السماح</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="help-step green">
+        <div class="help-step-i">🤖</div>
+        <div class="help-step-text">
+          <div class="help-step-t">على Android</div>
+          <div class="help-step-d">
+            ١. اسحب من أعلى الشاشة لفتح الإعدادات السريعة وفعّل أيقونة <strong>الموقع</strong> 📍<br>
+            ٢. <strong>الإعدادات</strong> → <strong>الموقع</strong> → اجعله <strong>مفعَّلاً</strong> و<strong>"دقّة عالية"</strong><br>
+            ٣. ارجع للمتصفّح واضغط على <strong>🔒 / ⓘ</strong> بجانب رابط الصفحة<br>
+            ٤. اختر <strong>الموقع</strong> ← <strong>السماح</strong><br>
+            ٥. اضغط زرّ "📍 موقعي" مرّة أخرى
+          </div>
+        </div>
+      </div>
+
+      <div class="help-step purple">
+        <div class="help-step-i">💻</div>
+        <div class="help-step-text">
+          <div class="help-step-t">على الكمبيوتر</div>
+          <div class="help-step-d">
+            اضغط على أيقونة 🔒 بجانب الرابط في الأعلى → <strong>إعدادات الموقع</strong> → <strong>الموقع: السماح</strong>، ثم أعِد تحميل الصفحة (F5).
+          </div>
+        </div>
+      </div>
+
+      <div class="help-step sun">
+        <div class="help-step-i">⚠️</div>
+        <div class="help-step-text">
+          <div class="help-step-t">إذا كنت داخل تطبيق آخر (واتساب / فايسبوك / إنستغرام)</div>
+          <div class="help-step-d">
+            هذه التطبيقات تفتح المواقع داخل متصفّح مدمج لا يدعم GPS أحياناً.<br>
+            <strong>الحل:</strong> اضغط ⋮ (الثلاث نقاط) ← <strong>"فتح في المتصفّح"</strong> أو <strong>"Open in Safari/Chrome"</strong>، ثم جرّب الزرّ مرّة أخرى.
+          </div>
+        </div>
+      </div>
+
+      <div class="help-step sun">
+        <div class="help-step-i">🔋</div>
+        <div class="help-step-text">
+          <div class="help-step-t">على iPhone — وضع الطاقة المنخفضة</div>
+          <div class="help-step-d">
+            إذا كان <strong>Low Power Mode</strong> مُفعَّلاً (البطارية صفراء)، GPS قد يكون معطّلاً مؤقتاً. أوقفه من الإعدادات → البطارية، ثم جرّب.
+          </div>
+        </div>
+      </div>
+
+      <div class="help-step sun">
+        <div class="help-step-i">✏️</div>
+        <div class="help-step-text">
+          <div class="help-step-t">بديل سريع — أدخل الإحداثيات يدوياً</div>
+          <div class="help-step-d">
+            افتح <a href="https://www.google.com/maps" target="_blank" rel="noopener" style="color:var(--blue);font-weight:700">خرائط Google</a> ← اضغط طويلاً على المكان المطلوب ← انسخ الإحداثيات (مثلاً <code style="background:#fff;padding:2px 6px;border-radius:6px">33.7234, 35.6121</code>) ← الصقها في حقل الموقع.
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-prim btn-block" style="margin-top:12px" onclick="closeModal()">حسناً، فهمت</button>
+    </div>
+  </div>`;
+  openModal(html);
+}
+
 async function submitAdd(e){
-  e.preventDefault();
+  if(e && e.preventDefault) e.preventDefault();
   const btn = document.getElementById('AD_SUB');
   const err = document.getElementById('AD_ERR'); err.innerHTML='';
 
   const first = document.getElementById('AD_FIRST').value.trim();
   const fam = document.getElementById('AD_FAM').value.trim();
-  const full = document.getElementById('AD_FULL').value.trim() || `${first} ${fam}`;
+  const father = document.getElementById('AD_FATHER').value.trim();
+  const mother = document.getElementById('AD_MOTHER').value.trim();
+  const fullRaw = document.getElementById('AD_FULL').value.trim();
+  const full = fullRaw || [first, father, fam].filter(Boolean).join(' ');
   const phone = document.getElementById('AD_PH').value.trim();
   const occupation = document.getElementById('AD_OCC').value.trim();
   const email = document.getElementById('AD_EMAIL').value.trim();
@@ -1951,8 +2227,17 @@ async function submitAdd(e){
   const byPh = document.getElementById('AD_BY_PH').value.trim();
   const img = document.getElementById('AD_IMG_LBL').dataset.img || null;
 
-  if(!first || !fam || !phone || !byNm || !byPh){
-    err.innerHTML='<div class="fm-error">⚠️ يرجى تعبئة الحقول المطلوبة</div>'; return;
+  // Validate
+  const missing = [];
+  if(!first) missing.push('الاسم الأول');
+  if(!father) missing.push('اسم الأب');
+  if(!fam) missing.push('العائلة');
+  if(!phone) missing.push('رقم الهاتف');
+  if(!byNm) missing.push('اسمك');
+  if(!byPh) missing.push('هاتفك');
+  if(missing.length){
+    err.innerHTML=`<div class="fm-error">⚠️ الحقول المفقودة: ${missing.join('، ')}</div>`;
+    return;
   }
 
   let lat=null, lng=null;
@@ -1963,8 +2248,9 @@ async function submitAdd(e){
   const wa = phone.replace(/[^\d]/g,'');
   const cc = phone.startsWith('+961') ? 'lb' : 'other';
 
-  const entry = {
-    mun_id: MUN_ID, name: full, first, family: fam,
+  // Full payload
+  const fullEntry = {
+    mun_id: MUN_ID, name: full, first, family: fam, father, mother,
     phone, wa, cc, occupation, email, address, lat, lng,
     work_phone: wph, work_address: waddr, work_lat, work_lng,
     notes, image: img,
@@ -1973,12 +2259,44 @@ async function submitAdd(e){
   };
 
   btn.disabled = true; btn.innerHTML='<span class="spin"></span> جاري الإرسال…';
+
+  // Try insert; if some columns don't exist on the DB schema, retry with a stripped-down version
+  async function tryInsert(payload){
+    const { data, error } = await sb.from('phonebook_entries').insert(payload).select().single();
+    return { data, error };
+  }
+
   try {
-    let saved = entry;
+    let saved = fullEntry;
     if(sb){
-      const { data, error } = await sb.from('phonebook_entries').insert(entry).select().single();
-      if(error) throw error;
-      saved = data;
+      let { data, error } = await tryInsert(fullEntry);
+
+      // Retry path: if the schema is older and rejects unknown columns
+      if(error){
+        const msg = (error.message || '').toLowerCase();
+        if(msg.includes('column') || msg.includes('schema') || msg.includes('does not exist') || error.code === 'PGRST204' || error.code === '42703'){
+          // Attempt 2: drop work_*, image, mother, source, submitter_* (older schema)
+          const minimal = {
+            mun_id: MUN_ID, name: full, first, family: fam, father,
+            phone, wa, cc, occupation, email, address, lat, lng,
+            notes,
+            status:'pending'
+          };
+          const r2 = await tryInsert(minimal);
+          if(r2.error){
+            // Attempt 3: bare minimum
+            const bare = { mun_id: MUN_ID, name: full, first, family: fam, phone, wa, cc, status:'pending' };
+            const r3 = await tryInsert(bare);
+            if(r3.error) throw r3.error;
+            data = r3.data; error = null;
+          } else {
+            data = r2.data; error = null;
+          }
+        } else {
+          throw error;
+        }
+      }
+      saved = data || fullEntry;
     } else {
       saved.id = 'local_' + Date.now();
     }
@@ -1991,8 +2309,9 @@ async function submitAdd(e){
     renderStats(); renderLettersBar(); renderFiltersBar(); renderGrid();
     if(isAdmin) await loadAdminQueues();
   } catch(ex){
-    console.error(ex);
-    err.innerHTML='<div class="fm-error">⚠️ تعذّر الإرسال. حاول لاحقاً</div>';
+    console.error('submitAdd error:', ex);
+    const detail = ex?.message || ex?.hint || 'سبب غير معروف';
+    err.innerHTML = `<div class="fm-error">⚠️ تعذّر الإرسال.<br><small style="opacity:.85">السبب: ${escHtml(detail)}</small><br><small style="opacity:.7;margin-top:4px;display:block">إذا تكرّر الخطأ، تواصل مع البلدية أو شغّل تحديثات SQL الأحدث.</small></div>`;
     btn.disabled = false; btn.innerHTML='➕ إرسال للمراجعة';
   }
 }
@@ -2400,6 +2719,21 @@ function renderInfoModal(){
         <div class="help-step-t">طلب تصحيح بسيط (لخطأ صغير)</div>
         <div class="help-step-d">
           داخل بطاقتك، اضغط <strong>طلب تصحيح</strong> واكتب التصحيح بإيجاز. خَيار أسرع للأخطاء البسيطة (حرف، رقم).
+        </div>
+      </div>
+    </div>
+
+    <div class="help-divider">إذا أردت إضافة موقعك على الخريطة</div>
+    <div class="help-step blue">
+      <div class="help-step-i">📍</div>
+      <div class="help-step-text">
+        <div class="help-step-t">تفعيل GPS أوّلاً</div>
+        <div class="help-step-d">
+          عند الضغط على زرّ <strong>"📍 موقعي"</strong> في النموذج، يحتاج الموقع إذنَ الوصول إلى GPS.<br>
+          إذا لم يتفاعل الزرّ أو ظهرت رسالة خطأ، تأكّد من:<br>
+          • <strong>على iPhone:</strong> الإعدادات → الخصوصية → خدمات الموقع → Safari/Chrome ← السماح<br>
+          • <strong>على Android:</strong> اسحب من الأعلى لتفعيل أيقونة الموقع 📍 ، ثم اضغط 🔒 بجانب رابط الصفحة في المتصفّح ← الموقع: السماح<br>
+          • <strong>بديل:</strong> افتح خرائط Google، اضغط طويلاً على المكان، انسخ الإحداثيات والصقها في حقل "الموقع".
         </div>
       </div>
     </div>
