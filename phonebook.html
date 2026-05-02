@@ -372,6 +372,12 @@ textarea.fm-i{resize:vertical;min-height:80px;}
 .spin{width:18px;height:18px;border:2.5px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
+/* WhatsApp brand button (share modal) */
+.share-btn-wa{background:linear-gradient(135deg,#25D366 0%,#128C7E 100%)!important;color:#fff!important;border:none!important;box-shadow:0 3px 10px rgba(37,211,102,.35);}
+.share-btn-wa:active{box-shadow:0 5px 14px rgba(37,211,102,.5);}
+.share-btn-wa .share-btn-i{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;}
+.share-btn-wa .share-btn-i svg{display:block;}
+
 /* Help button in header — distinct sun/yellow pill so it stands out */
 .hd-help{width:auto!important;border-radius:var(--r-full);padding:0 14px 0 12px;gap:6px;background:var(--sun)!important;color:#3a2502!important;border:1.5px solid var(--sun2);box-shadow:0 2px 8px rgba(245,166,35,.4);}
 .hd-help:hover,.hd-help:active{background:var(--sun2)!important;color:#fff!important;}
@@ -1453,56 +1459,62 @@ function openDetail(c){
 
 function copyText(t){ navigator.clipboard.writeText(t).then(()=> toast('✅ تم النسخ')); }
 
+// WhatsApp brand SVG (used in share button)
+const WA_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" fill="currentColor"><path d="M19.11 17.205c-.372 0-1.088 1.39-1.518 1.39a.63.63 0 0 1-.295-.083c-.882-.443-1.736-.91-2.444-1.59-.193-.184-.452-.7-.452-.7-.05-.063-.077-.142-.077-.225 0-.142.075-.244.19-.34.227-.198.444-.4.625-.624.13-.16.241-.34.343-.518.099-.18.198-.379.198-.578 0-.198-.099-.396-.198-.594-.099-.198-.198-.396-.297-.594-.099-.198-.198-.396-.198-.594 0-.198-.198-.396-.297-.396l-.62.001a.81.81 0 0 0-.585.265c-.22.252-.844.99-.844 2.41 0 1.42 1.034 2.794 1.179 2.987.144.193 2.034 3.107 4.928 4.358a16.08 16.08 0 0 0 1.659.612c.696.221 1.331.19 1.832.115.559-.083 1.722-.704 1.964-1.385.243-.681.243-1.265.17-1.385-.073-.121-.265-.193-.557-.337zm-3.116 8.13h-.003a8.84 8.84 0 0 1-4.504-1.234l-.323-.192-3.348.878.894-3.262-.21-.334a8.81 8.81 0 0 1-1.349-4.687c.002-4.875 3.97-8.842 8.847-8.842a8.79 8.79 0 0 1 6.252 2.594 8.79 8.79 0 0 1 2.59 6.255c-.002 4.876-3.97 8.844-8.846 8.844zm7.523-16.366a10.55 10.55 0 0 0-7.52-3.116c-5.853 0-10.617 4.762-10.62 10.616a10.59 10.59 0 0 0 1.417 5.305L5.31 28l5.566-1.461a10.61 10.61 0 0 0 5.07 1.291h.005c5.853 0 10.617-4.764 10.619-10.617a10.55 10.55 0 0 0-3.107-7.519z"/></svg>`;
+
 // Build a beautifully formatted multi-line message with EVERY detail of a contact
+// Optimized for WhatsApp: ONE prominent map link near top so WhatsApp shows preview;
+// no self-referential wa.me link in body (WhatsApp gets confused otherwise).
 function buildShareMessage(c){
   const lines = [];
-  lines.push('📒 *دليل وادي الست — جهة اتصال*');
-  lines.push('━━━━━━━━━━━━━━━━━━━━');
+  lines.push('📒 *دليل وادي الست*');
   lines.push('');
   lines.push(`👤 *${c.name || ''}*`);
   if(c.family) lines.push(`👨‍👩‍👧 آل ${c.family}`);
-  if(c.father) lines.push(`👨 الأب: ${c.father}`);
-  if(c.mother) lines.push(`👩 الأم: ${c.mother}`);
+  if(c.father) lines.push(`الأب: ${c.father}`);
+  if(c.mother) lines.push(`الأم: ${c.mother}`);
   lines.push('');
 
-  // Personal contact
+  // Phone (no wa.me link in body — recipients can long-press the number to open WhatsApp)
   if(c.phone && !c.phone_hidden){
-    lines.push(`📞 *الهاتف:* ${fmtPhone(c.phone)}`);
-    if(c.cc === 'lb' && !c.disable_wa && c.wa) lines.push(`💬 *واتساب:* https://wa.me/${c.wa}`);
+    lines.push(`📞 ${fmtPhone(c.phone)}`);
   } else if(c.phone_hidden){
     lines.push(`🔒 الرقم مخفي بطلب صاحبه`);
   }
-  if(c.email) lines.push(`✉️ *البريد:* ${c.email}`);
-  if(c.address && !c.address_hidden) lines.push(`📍 *العنوان:* ${c.address}`);
-  if(c.lat && c.lng && !c.address_hidden){
-    lines.push(`🗺️ *الموقع على الخريطة:*`);
-    lines.push(`https://www.google.com/maps?q=${c.lat},${c.lng}`);
-  }
+  if(c.email) lines.push(`✉️ ${c.email}`);
+  if(c.address && !c.address_hidden) lines.push(`📍 ${c.address}`);
 
-  // Work
-  const hasWork = c.occupation || c.work_phone || c.work_address || (c.work_lat && c.work_lng);
+  // Work info (without map link here — keep map links to ONE for preview)
+  const hasWork = c.occupation || c.work_phone || c.work_address;
   if(hasWork){
     lines.push('');
     lines.push('━ *معلومات العمل* ━');
-    if(c.occupation) lines.push(`💼 *المهنة:* ${c.occupation}`);
-    if(c.work_phone) lines.push(`☎️ *هاتف العمل:* ${fmtPhone(c.work_phone)}`);
-    if(c.work_address) lines.push(`🏢 *عنوان العمل:* ${c.work_address}`);
-    if(c.work_lat && c.work_lng){
-      lines.push(`🗺️ *موقع العمل:*`);
-      lines.push(`https://www.google.com/maps?q=${c.work_lat},${c.work_lng}`);
-    }
+    if(c.occupation) lines.push(`💼 ${c.occupation}`);
+    if(c.work_phone) lines.push(`☎️ ${fmtPhone(c.work_phone)}`);
+    if(c.work_address) lines.push(`🏢 ${c.work_address}`);
   }
 
   // Notes
   if(c.notes){
     lines.push('');
-    lines.push(`📝 *ملاحظات:* ${c.notes}`);
+    lines.push(`📝 ${c.notes}`);
+  }
+
+  // Map link goes LAST and ALONE on its line — WhatsApp will use it for the rich preview
+  // Prefer the personal location; fallback to work location
+  let mapLat = null, mapLng = null, mapLabel = '';
+  if(c.lat && c.lng && !c.address_hidden){ mapLat = c.lat; mapLng = c.lng; mapLabel = 'الموقع'; }
+  else if(c.work_lat && c.work_lng){ mapLat = c.work_lat; mapLng = c.work_lng; mapLabel = 'موقع العمل'; }
+
+  if(mapLat && mapLng){
+    lines.push('');
+    lines.push(`🗺️ ${mapLabel} على الخريطة:`);
+    // Use Google Maps share-friendly URL format that previews nicely on WhatsApp
+    lines.push(`https://maps.google.com/?q=${mapLat},${mapLng}`);
   }
 
   lines.push('');
-  lines.push('━━━━━━━━━━━━━━━━━━━━');
-  lines.push('📒 من دليل بلدية وادي الست');
-  lines.push('https://iantradingsal.github.io/WATER/phonebook.html');
+  lines.push('— من دليل بلدية وادي الست');
 
   return lines.join('\n');
 }
@@ -1527,8 +1539,9 @@ function shareContact(c){
       <div style="background:var(--surface2);padding:13px;border-radius:var(--r);font-size:12.5px;line-height:1.7;white-space:pre-wrap;direction:rtl;text-align:right;max-height:240px;overflow-y:auto;border:1px solid var(--border);font-family:monospace,var(--font);" id="SHR_PREVIEW">${escHtml(text)}</div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
-        <button class="btn btn-grn" onclick="shareViaWhatsapp()" style="background:linear-gradient(135deg,#25D366,#128C7E)">
-          <span style="font-size:18px">💬</span> واتساب
+        <button class="btn share-btn-wa" onclick="shareViaWhatsapp()">
+          <span class="share-btn-i">${WA_LOGO_SVG}</span>
+          <span>واتساب</span>
         </button>
         <button class="btn btn-prim" onclick="shareViaSystem()">
           <span style="font-size:18px">📤</span> مشاركة عامّة
@@ -1553,7 +1566,24 @@ function _getShareName(){ return document.getElementById('SHR_NAME')?.value || '
 
 function shareViaWhatsapp(){
   const text = _getShareText();
-  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  // Use api.whatsapp.com on mobile (deeper integration, opens app directly)
+  // and wa.me on desktop. Both auto-detect, but api.whatsapp.com handles long text better
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  const url = isMobile
+    ? `whatsapp://send?text=${encodeURIComponent(text)}`
+    : `https://web.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  // Try the deep link first; if browser blocks, fall back to wa.me
+  try {
+    const w = window.open(url, '_blank');
+    // Fallback after a moment if deep link didn't trigger
+    setTimeout(() => {
+      if(!w || w.closed){
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+      }
+    }, 600);
+  } catch(e){
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  }
 }
 function shareViaSystem(){
   const text = _getShareText();
